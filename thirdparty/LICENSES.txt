@@ -1,0 +1,4 @@
+== ACKNOWLEDGEMENTS ==
+
+The basic project template is based on: "cpp-project-template" by Michael Aaron Safyan (http://code.google.com/p/cpp-project-template/)
+
