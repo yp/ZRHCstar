@@ -1,4 +1,4 @@
-file (GLOB_RECURSE project_SRCS *.cpp *.cxx *.cc *.C *.c *.h *.hpp)
+file (GLOB_RECURSE project_SRCS [A-Za-z0-9]*.cpp [A-Za-z0-9]*.cxx [A-Za-z0-9]*.cc [A-Za-z0-9]*.C [A-Za-z0-9]*.c [A-Za-z0-9]*.h [A-Za-z0-9]*.hpp)
 set (project_MOC_HEADERS app.h)
 set (project_LIBS ${Boost_LIBRARIES} ${Log4Cxx_LIBRARIES})
 set (project_BIN ${PROJECT_NAME})
