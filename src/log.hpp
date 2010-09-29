@@ -4,7 +4,8 @@
 #include <string>
 #include <cstdlib>
 
-int initialize_logger(const std::string& name);
+int initialize_application(const std::string& name);
+int initialize_logger(void);
 
 
 #endif // __LOG_HPP__

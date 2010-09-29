@@ -3,5 +3,5 @@
 #include "log.hpp"
 
 int main() {
-  initialize_logger(APPLICATION_CODENAME " " APPLICATION_VERSION_STRING);
+  initialize_application(APPLICATION_CODENAME " " APPLICATION_VERSION_STRING);
 }

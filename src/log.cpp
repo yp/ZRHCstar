@@ -13,9 +13,20 @@ using namespace log4cxx;
 using namespace log4cxx::helpers;
 using namespace boost::filesystem;
 
-int initialize_logger(const string& name) {
+int initialize_application(const string& name) {
+  int result= initialize_logger();
+  if (result == EXIT_SUCCESS) {
+	 LOG4CXX_INFO(Logger::getRootLogger(), name << " - started.");
+  }
+  return result;
+}
+
+
+int initialize_logger() {
+  static bool configured= false;
+  if (configured)
+	 return EXIT_SUCCESS;
   int result = EXIT_SUCCESS;
-  bool configured= false;
   try {
 	 bool file_found= false;
 	 path path(current_path());
@@ -35,9 +46,7 @@ int initialize_logger(const string& name) {
 		BasicConfigurator::configure();
 		configured= true;
 	 }
-	 if (configured) {
-		LOG4CXX_INFO(Logger::getRootLogger(), name << " - started.");
-	 } else {
+	 if (!configured) {
 		result = EXIT_FAILURE;
 	 }
   } catch(Exception&) {
