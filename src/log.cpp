@@ -16,6 +16,8 @@ int initialize_application(const string& name) {
   int result= initialize_logger();
   if (result == EXIT_SUCCESS) {
 	 ROOT_INFO(name << " - started.");
+	 ROOT_DEBUG("Source code version: " APPLICATION_SOURCE_VERSION);
+	 ROOT_DEBUG("Compiled on:         " __DATE__ "  -  " __TIME__);
   }
   return result;
 }

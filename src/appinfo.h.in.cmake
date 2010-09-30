@@ -22,6 +22,7 @@
 #cmakedefine APPLICATION_VENDOR_NAME        "@APPLICATION_VENDOR_NAME@"
 #cmakedefine APPLICATION_VENDOR_URL         "@APPLICATION_VENDOR_URL@"
 #cmakedefine APPLICATION_ID                 "@APPLICATION_VENDOR_ID@"
+#cmakedefine APPLICATION_SOURCE_VERSION     "@APPLICATION_SOURCE_VERSION@"
 
 #ifndef APPLICATION_NAME
 #   error "Please specify the application name in the top-level CMakeLists.txt file."
@@ -69,6 +70,10 @@
 
 #ifndef APPLICATION_ID
 #   define APPLICATION_ID APPLICATION_VENDOR_ID "." APPLICATION_CODENAME
+#endif
+
+#ifndef APPLICATION_SOURCE_VERSION
+#   error "Please specify the application source version in the top-level CmakeLists.txt file or include the ExtractSourceVersionFromGit module."
 #endif
 
 #endif

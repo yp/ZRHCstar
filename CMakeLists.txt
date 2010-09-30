@@ -55,6 +55,8 @@ link_directories(${Log4Cxx_LIBRARY_DIRS})
 # link_directories(${UnitTestPlusPlus_LIBRARY_DIRS})
 
 
+include(ExtractSourceVersionFromGit)
+
 #
 # Configure Files
 #
