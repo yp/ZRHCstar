@@ -1,26 +1,38 @@
 ##############################################################
 #               CMake Project Wrapper Makefile               #
 ############################################################## 
+DEFAULT_STATUS := debug
+
+ifndef STATUS
+STATUS:=__undefined__status__
+endif
+
+
+ifneq ($(STATUS), debug)
+ifneq ($(STATUS), release)
+
+$(info No status specified. Using the default status "${DEFAULT_STATUS}")
+
+STATUS:=${DEFAULT_STATUS}
+
+endif
+endif
 
 SHELL := /bin/bash
 RM    := rm -rf
 
-all: ./build/Makefile
-	@ $(MAKE) -C build
+all: ./build/${STATUS}/Makefile
+	@ $(MAKE) -C build/${STATUS}
 
-./build/Makefile:
-	@ (mkdir -p build bin docs; cd build >/dev/null 2>&1 && cmake ..)
+./build/${STATUS}/Makefile:
+	@ (mkdir -p build/${STATUS} bin docs && \
+		cd build/${STATUS} >/dev/null 2>&1 && \
+		cmake -DCMAKE_BUILD_TYPE=${STATUS} ../.. \
+	)
 
 distclean:
-	@- (cd build >/dev/null 2>&1 && cmake .. >/dev/null 2>&1)
-	@- $(MAKE) --silent -C build clean || true
-	@- $(RM) ./build/Makefile
-	@- $(RM) ./build/src
-	@- $(RM) ./build/test
-	@- $(RM) ./build/CMake*
-	@- $(RM) ./build/cmake.*
-	@- $(RM) ./build/*.cmake
-	@- $(RM) ./build/*.txt
+	@- $(RM) ./bin/*
+	@- $(RM) ./build/*
 	@- $(RM) ./docs/*.html
 	@- $(RM) ./docs/*.css
 	@- $(RM) ./docs/*.png
@@ -34,7 +46,7 @@ distclean:
 
 ifeq ($(findstring distclean,$(MAKECMDGOALS)),)
 
-    $(MAKECMDGOALS): ./build/Makefile
-	@ $(MAKE) -C build $(MAKECMDGOALS)
+    $(MAKECMDGOALS): ./build/${STATUS}/Makefile
+	@ $(MAKE) -C build/${STATUS} $(MAKECMDGOALS)
 
 endif
