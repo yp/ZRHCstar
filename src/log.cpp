@@ -1,7 +1,6 @@
 #include "log.hpp"
 
 #include <boost/filesystem.hpp>
-#include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/basicconfigurator.h>
 #include <log4cxx/helpers/exception.h>
@@ -16,7 +15,7 @@ using namespace boost::filesystem;
 int initialize_application(const string& name) {
   int result= initialize_logger();
   if (result == EXIT_SUCCESS) {
-	 LOG4CXX_INFO(Logger::getRootLogger(), name << " - started.");
+	 ROOT_INFO(name << " - started.");
   }
   return result;
 }
