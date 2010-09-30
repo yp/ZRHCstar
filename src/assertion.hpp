@@ -5,6 +5,8 @@
  * Class to express run-time assertions.
  *
  **/
+#ifndef __ASSERTION_HPP__
+#define __ASSERTION_HPP__
 
 #include <log4cxx/logger.h>
 #include <boost/preprocessor/stringize.hpp>
@@ -69,3 +71,5 @@ public:
 
 
 #define ASSERT( cond ) asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " __FILE__ ":" BOOST_PP_STRINGIZE(__LINE__))
+
+#endif // __ASSERTION_HPP__
