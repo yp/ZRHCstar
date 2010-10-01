@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <log4cxx/logger.h>
 
-int initialize_application(const std::string& name);
+
 int initialize_logger(void);
 
 #define _ROOT_LOG(level, msg) LOG4CXX_ ## level(log4cxx::Logger::getRootLogger(), msg)
