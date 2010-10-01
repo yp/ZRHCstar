@@ -8,10 +8,10 @@
 #ifndef __ASSERTION_HPP__
 #define __ASSERTION_HPP__
 
+#include "log.hpp"
+
 #include <log4cxx/logger.h>
 #include <boost/preprocessor/stringize.hpp>
-
-using namespace log4cxx;
 
 class assertion_failed_exception {
 private:
@@ -40,10 +40,10 @@ class asserter_t {
 
 private:
 
-  LoggerPtr logger;
+  log4cxx::LoggerPtr logger;
 
   asserter_t(void)
-		:logger(Logger::getLogger("assertions"))
+		:logger(log4cxx::Logger::getLogger("assertions"))
   {
 	 initialize_logger();
   }
@@ -54,16 +54,16 @@ public:
 	 return asserter;
   }
 
-  void assert(const bool condition) const {
+  void basic_assert(const bool condition) const {
 	 if (!condition) {
-		LOG4CXX_FATAL(logger, "Assertion violated!");
+		FATAL("Assertion violated!");
 		throw assertion_failed_exception();
 	 }
   }
 
   void assert_msg(const bool condition, const std::string& msg) const {
 	 if (!condition) {
-		LOG4CXX_FATAL(logger, msg);
+		FATAL(msg);
 		throw assertion_failed_exception(msg);
 	 }
   }
