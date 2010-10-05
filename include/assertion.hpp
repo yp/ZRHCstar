@@ -70,13 +70,13 @@ public:
 
 #define DESCRIBE __FILE__ ":" BOOST_PP_STRINGIZE(__LINE__)
 
-#define ASSERT( cond ) asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " DESCRIBE)
+#define MY_ASSERT( cond ) asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " DESCRIBE)
 
-#define FAIL asserter_t::get_asserter().assert_msg( (false), "Unexpected control-flow at file " DESCRIBE)
+#define MY_FAIL asserter_t::get_asserter().assert_msg( (false), "Unexpected control-flow at file " DESCRIBE)
 
-#define CHECK( cond ) do {								\
+#define MY_CHECK( cond ) do {								\
   DEBUG("Checking " BOOST_PP_STRINGIZE(cond) "...");	\
-  ASSERT(cond);													\
+  MY_ASSERT(cond);													\
   } while (0)
 
 

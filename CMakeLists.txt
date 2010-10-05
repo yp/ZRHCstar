@@ -31,6 +31,8 @@ set (MAINFOLDER ${PROJECT_SOURCE_DIR})
 set (EXECUTABLE_OUTPUT_PATH "${MAINFOLDER}/bin")
 set (LIBRARY_OUTPUT_PATH "${MAINFOLDER}/lib")
 
+set (project_base_LIB ${PROJECT_NAME}-lib)
+
 #
 # Project Search Paths
 #
@@ -50,9 +52,6 @@ link_directories(${Boost_LIBRARY_DIRS})
 find_package (Log4Cxx REQUIRED)
 include_directories(${Log4Cxx_INCLUDE_DIRS})
 link_directories(${Log4Cxx_LIBRARY_DIRS})
-# find_package (UnitTestPlusPlus REQUIRED)
-# include_directories(${UnitTestPlusPlus_INCLUDE_DIRS})
-# link_directories(${UnitTestPlusPlus_LIBRARY_DIRS})
 
 
 include(ExtractSourceVersionFromGit)
@@ -82,7 +81,7 @@ endforeach (CONFIGINPUT ${CONFIGINPUTS})
 # Add Build Targets
 #
 add_subdirectory(src)
-# add_subdirectory(test)
+add_subdirectory(test)
 
 #
 # Add Install Targets

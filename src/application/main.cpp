@@ -3,7 +3,12 @@
 #include "application.hpp"
 #include "log.hpp"
 #include "assertion.hpp"
+#include "data.hpp"
+#include "utility.hpp"
 
+#include <iostream>
+
+using namespace std;
 
 class zrhcstar_application_t: public application_t {
 

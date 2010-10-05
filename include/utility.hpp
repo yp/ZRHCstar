@@ -39,7 +39,7 @@ public:
 	 if (c == '0'+derived_enum::values[0]) {
 		return derived_enum::enum_values[0];
 	 } else {
-		FAIL;
+		MY_FAIL;
 		return derived_enum::enum_values[default_index];
 	 }
   }
@@ -80,7 +80,7 @@ public:
 	 if (in >> h) {
 		val= static_switch< n_values-1, default_index, derived_enum>::EXEC(h);
 	 } else {
-		FAIL;
+		MY_FAIL;
 		val= derived_enum::enum_values[default_index];
 	 }
 	 return in;

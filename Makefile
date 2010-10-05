@@ -32,6 +32,7 @@ all: ./build/${STATUS}/Makefile
 
 distclean:
 	@- $(RM) ./bin/*
+	@- $(RM) ./lib/*
 	@- $(RM) ./build/*
 	@- $(RM) ./docs/*.html
 	@- $(RM) ./docs/*.css
