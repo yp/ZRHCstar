@@ -6,6 +6,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "log.hpp"
+#include "assertion.hpp"
 
 class application_t {
 
@@ -39,6 +40,10 @@ public:
 	 } catch (std::exception& e) {
 		FATAL("Exception occurred: " << e.what() << ".");
 		result= EXIT_FAILURE;
+	 } catch (assertion_failed_exception& e) {
+		FATAL("Assertion failed: " << e.what() << ".");
+		result= EXIT_FAILURE;
+		throw e;
 	 } catch (...) {
 		FATAL("Generic exception occurred.");
 		result= EXIT_FAILURE;

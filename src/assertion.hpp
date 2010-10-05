@@ -26,7 +26,6 @@ public:
   {}
 
   ~assertion_failed_exception(void) {
-	 throw assertion_failed_exception(_msg);
   }
 
   const std::string& what(void) const {
@@ -69,7 +68,16 @@ public:
   }
 };
 
+#define DESCRIBE __FILE__ ":" BOOST_PP_STRINGIZE(__LINE__)
 
-#define ASSERT( cond ) asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " __FILE__ ":" BOOST_PP_STRINGIZE(__LINE__))
+#define ASSERT( cond ) asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " DESCRIBE)
+
+#define FAIL asserter_t::get_asserter().assert_msg( (false), "Unexpected control-flow at file " DESCRIBE)
+
+#define CHECK( cond ) do {								\
+  DEBUG("Checking " BOOST_PP_STRINGIZE(cond) "...");	\
+  ASSERT(cond);													\
+  } while (0)
+
 
 #endif // __ASSERTION_HPP__
