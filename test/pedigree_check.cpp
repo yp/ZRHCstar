@@ -2,9 +2,12 @@
 
 #include "pedigree.hpp"
 
+#include <boost/bind.hpp>
+
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 TEST(pedigree, access_hm) {
   pedigree_t ped(4);
@@ -214,4 +217,47 @@ TEST(pedigree, trios) {
   ASSERT_TRUE(ind1.has_children());
   ASSERT_FALSE(ind5.has_children());
   ASSERT_FALSE(ind5.is_founder());
+}
+
+TEST(pedigree, individual_enumeration) {
+
+  pedigree_t ped(4);
+
+  pedigree_t::individual_t& ind0= ped.add_individual();
+  pedigree_t::individual_t& ind1= ped.add_individual();
+  pedigree_t::individual_t& ind2= ped.add_individual();
+  pedigree_t::individual_t& ind3= ped.add_individual();
+  pedigree_t::individual_t& ind4= ped.add_individual();
+  pedigree_t::individual_t& ind5= ped.add_individual();
+  pedigree_t::individual_t& ind6= ped.add_individual();
+  pedigree_t::individual_t& ind7= ped.add_individual();
+  ind0.set_id(100);
+  ind1.set_id(101);
+  ind2.set_id(102);
+  ind3.set_id(103);
+  ind4.set_id(104);
+  ind5.set_id(105);
+  ind6.set_id(106);
+  ind7.set_id(107);
+
+  ASSERT_EQ(8, ped.size());
+  ASSERT_EQ(8, ped.individuals().size());
+
+  std::ostringstream oss;
+  std::ostream_iterator<size_t> osi(oss, " ");
+  std::transform(ped.individuals().begin(),
+					  ped.individuals().end(),
+					  osi,
+					  boost::bind(&pedigree_t::individual_t::id,_1));
+  ASSERT_EQ(std::string("100 101 102 103 104 105 106 107 "),
+				oss.str());
+
+  std::transform(ped.individuals().rbegin(),
+					  ped.individuals().rend(),
+					  osi,
+					  boost::bind(&pedigree_t::individual_t::id,_1));
+  ASSERT_EQ(std::string("100 101 102 103 104 105 106 107 "
+								"107 106 105 104 103 102 101 100 "),
+				oss.str());
+
 }

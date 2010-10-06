@@ -260,6 +260,14 @@ public:
 	 add_trio_by_progr(progr_id, progr_father_id, progr_mother_id);
   }
 
+  const individuals_t& individuals() const {
+	 return _indivs;
+  }
+
+  const size_t size() const {
+	 return _indivs.size();
+  }
+
 };
 
 typedef basic_pedigree_t<> pedigree_t;
