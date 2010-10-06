@@ -222,8 +222,10 @@ public:
 			 << "father: " << progr_father_id << ", "
 			 << "mother: " << progr_mother_id << ").");
 	 MY_ASSERT(progr_id < _indivs.size());
-	 MY_ASSERT(progr_father_id < _indivs.size());
-	 MY_ASSERT(progr_mother_id < _indivs.size());
+	 MY_ASSERT((progr_father_id < _indivs.size()) ||
+				  (progr_father_id == not_existent_id));
+	 MY_ASSERT((progr_mother_id < _indivs.size()) ||
+				  (progr_mother_id == not_existent_id));
 	 MY_ASSERT((_fathers[progr_id] == not_existent_id) ||
 				  (progr_father_id == not_existent_id) ||
 				  (_fathers[progr_id] == progr_father_id));
