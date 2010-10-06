@@ -205,7 +205,23 @@ public:
 
   individual_t& get_by_id(const size_t real_id) {
 	 TRACE("Getting individual with real_id = " << real_id);
+	 MY_ASSERT(real_id != not_existent_id);
 	 return get_by_progr(get_progr_id(real_id));
+  }
+
+  individual_t& get_by_id_or_create(const size_t real_id) {
+	 TRACE("Searching for individual with real_id = " << real_id);
+	 MY_ASSERT(real_id != not_existent_id);
+	 size_t progr= get_progr_id(real_id);
+	 if (progr == not_existent_id) {
+		TRACE("Individual not found. Creating...");
+		individual_t& ind= add_individual();
+		ind.set_id(real_id);
+		return ind;
+	 } else {
+		TRACE("Individual found. Returning...");
+		return get_by_progr(progr);
+	 }
   }
 
   individual_t& operator[](const size_t real_id) {

@@ -261,3 +261,35 @@ TEST(pedigree, individual_enumeration) {
 				oss.str());
 
 }
+
+TEST(pedigree, auto_creation) {
+  pedigree_t ped(4);
+
+  pedigree_t::individual_t& ind0= ped.get_by_id_or_create(100);
+  pedigree_t::individual_t& ind1= ped.get_by_id_or_create(101);
+  pedigree_t::individual_t& ind2= ped.get_by_id_or_create(102);
+  pedigree_t::individual_t& ind3= ped.get_by_id_or_create(103);
+  pedigree_t::individual_t& ind4= ped.get_by_id_or_create(104);
+  pedigree_t::individual_t& ind5= ped.get_by_id_or_create(105);
+  pedigree_t::individual_t& ind6= ped.get_by_id_or_create(106);
+  pedigree_t::individual_t& ind7= ped.get_by_id_or_create(107);
+
+  pedigree_t::individual_t& ind3_bis= ped.get_by_id_or_create(103);
+
+  ASSERT_EQ(ind0.id(), 100);
+  ASSERT_EQ(ind1.id(), 101);
+  ASSERT_EQ(ind2.id(), 102);
+  ASSERT_EQ(ind3.id(), 103);
+  ASSERT_EQ(ind4.id(), 104);
+  ASSERT_EQ(ind5.id(), 105);
+  ASSERT_EQ(ind6.id(), 106);
+  ASSERT_EQ(ind7.id(), 107);
+  ASSERT_EQ(ind3_bis.id(), 103);
+
+  ASSERT_EQ(&ind3, &ind3_bis);
+
+  ASSERT_THROW(ped.get_by_id_or_create(pedigree_t::not_existent_id),
+					assertion_failed_exception);
+  ASSERT_THROW(ped.get_by_id(pedigree_t::not_existent_id),
+					assertion_failed_exception);
+}
