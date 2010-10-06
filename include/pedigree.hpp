@@ -15,12 +15,12 @@
 #include <list>
 #include <map>
 #include <iostream>
-#include <algorithm>
 #include <climits>
+
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include "log.hpp"
 #include "assertion.hpp"
-#include "utility.hpp"
 #include "gender.hpp"
 #include "haplotypes_genotypes.hpp"
 
@@ -73,10 +73,10 @@ public:
 	 }
 
 	 const hap_t& hp() const {
-		return (*(_p._hp[_progr_id]));
+		return _p._hp[_progr_id];
 	 }
 	 hap_t& hp() {
-		return (*(_p._hp[_progr_id]));
+		return _p._hp[_progr_id];
 	 }
 	 const typename hap_t::base& hp(const size_t pos) const {
 		return hp()[pos];
@@ -85,10 +85,10 @@ public:
 		return hp()[pos];
 	 }
 	 const hap_t& hm() const {
-		return (*(_p._hm[_progr_id]));
+		return _p._hm[_progr_id];
 	 }
 	 hap_t& hm() {
-		return (*(_p._hm[_progr_id]));
+		return _p._hm[_progr_id];
 	 }
 	 const typename hap_t::base& hm(const size_t pos) const {
 		return hm()[pos];
@@ -97,10 +97,10 @@ public:
 		return hm()[pos];
 	 }
 	 const gen_t& g() const {
-		return (*(_p._g[_progr_id]));
+		return _p._g[_progr_id];
 	 }
 	 gen_t& g() {
-		return (*(_p._g[_progr_id]));
+		return _p._g[_progr_id];
 	 }
 	 const typename gen_t::base& g(const size_t pos) const {
 		return g()[pos];
@@ -140,14 +140,14 @@ private:
 
   const size_t _len;
 
-  std::vector<individual_t*> _indivs;
+  boost::ptr_vector<individual_t> _indivs;
   std::vector<size_t> _real_ids;
   std::vector<gender_t> _genders;
   std::map<size_t, size_t> _real2progr;
 
-  std::vector<haplotype_t*> _hp;
-  std::vector<haplotype_t*> _hm;
-  std::vector<genotype_t*> _g;
+  boost::ptr_vector<haplotype_t> _hp;
+  boost::ptr_vector<haplotype_t> _hm;
+  boost::ptr_vector<genotype_t> _g;
 
   std::vector<size_t> _fathers;
   std::vector<size_t> _mothers;
@@ -177,13 +177,6 @@ public:
 
   ~basic_pedigree_t() {
 	 TRACE("Destroying pedigree");
-	 deleter_t<individual_t> d_ind;
-	 deleter_t<haplotype_t> d_hap;
-	 deleter_t<genotype_t> d_gen;
-	 std::for_each(_indivs.begin(), _indivs.end(), d_ind);
-	 std::for_each(_hp.begin(), _hp.end(), d_hap);
-	 std::for_each(_hm.begin(), _hm.end(), d_hap);
-	 std::for_each(_g.begin(), _g.end(), d_gen);
   }
 
   individual_t& add_individual(void) {
@@ -197,13 +190,13 @@ public:
 	 _fathers.push_back(not_existent_id);
 	 _mothers.push_back(not_existent_id);
 	 _children.push_back(std::list<size_t>());
-	 return *_indivs.back();
+	 return _indivs.back();
   }
 
   individual_t& get_by_progr(const size_t progr_id) {
 	 TRACE("Getting individual with progr_id = " << progr_id);
 	 MY_ASSERT(progr_id < _indivs.size());
-	 return *(_indivs[progr_id]);
+	 return _indivs[progr_id];
   }
 
   individual_t& get_by_id(const size_t real_id) {
