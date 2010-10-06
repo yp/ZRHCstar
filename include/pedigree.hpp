@@ -17,6 +17,7 @@
 #include <iostream>
 #include <climits>
 
+#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include "log.hpp"
@@ -32,14 +33,17 @@ class basic_pedigree_t {
   friend class individual_t;
 public:
 
+  class individual_t;
+
   typedef T_GENOTYPE gen_t;
   typedef T_HAPLOTYPE hap_t;
   typedef typename gen_t::base g;
   typedef typename hap_t::base h;
+  typedef boost::ptr_vector<individual_t> individuals_t;
 
   static const size_t not_existent_id= ULONG_MAX;
 
-  class individual_t {
+  class individual_t: boost::noncopyable {
 	 friend class basic_pedigree_t;
   private:
 	 basic_pedigree_t<gen_t, hap_t>& _p;
@@ -140,7 +144,7 @@ private:
 
   const size_t _len;
 
-  boost::ptr_vector<individual_t> _indivs;
+  individuals_t _indivs;
   std::vector<size_t> _real_ids;
   std::vector<gender_t> _genders;
   std::map<size_t, size_t> _real2progr;
