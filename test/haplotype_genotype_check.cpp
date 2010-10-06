@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "data.hpp"
+#include "haplotypes_genotypes.hpp"
 
 #include <iostream>
 #include <sstream>

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "data.hpp"
+#include "pedigree.hpp"
 
 #include <iostream>
 #include <sstream>
