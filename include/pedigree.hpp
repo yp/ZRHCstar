@@ -163,7 +163,7 @@ protected:
 		DEBUG("Identifier " << real_id << " not found!");
 		return not_existent_id;
 	 } else {
-		return (*it).second;
+		return it->second;
 	 }
   }
 
