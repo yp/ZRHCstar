@@ -101,3 +101,34 @@ TEST(pedigree, identifiers) {
 					assertion_failed_exception);
 
 }
+
+
+TEST(pedigree, trios) {
+  pedigree_t ped(4);
+
+  pedigree_t::individual_t& ind0= ped.add_individual();
+  pedigree_t::individual_t& ind1= ped.add_individual();
+  pedigree_t::individual_t& ind2= ped.add_individual();
+  pedigree_t::individual_t& ind3= ped.add_individual();
+  ind0.set_id(100);
+  ind1.set_id(101);
+  ind2.set_id(102);
+  ind3.set_id(103);
+
+  ASSERT_NO_THROW(ind1.set_gender(gender_t::FEMALE));
+  ASSERT_NO_THROW(ind1.set_gender(gender_t::MALE));
+  ASSERT_EQ(ind1.gender(), gender_t::MALE);
+
+  ped.add_trio_by_id(100, 101, 102);
+
+  ASSERT_THROW(ind2.set_gender(gender_t::MALE), assertion_failed_exception);
+  ASSERT_THROW(ind1.set_gender(gender_t::UNSPEC), assertion_failed_exception);
+
+  ASSERT_EQ(ind0.gender(), gender_t::UNSPEC);
+  ASSERT_EQ(ind1.gender(), gender_t::MALE);
+  ASSERT_EQ(ind2.gender(), gender_t::FEMALE);
+
+  ASSERT_THROW(ped.add_trio_by_progr(0, 1, 3),
+					assertion_failed_exception);
+  ASSERT_NO_THROW(ped.add_trio_by_progr(3, 1, 2));
+}

@@ -8,6 +8,8 @@
 #ifndef __GENDER_HPP__
 #define __GENDER_HPP__
 
+#include <iostream>
+
 class gender_t {
 
 private:
@@ -58,6 +60,10 @@ public:
 
   friend bool operator!=(const gender_t& g1, const gender_t& g2) {
 	 return g1._g!=g2._g;
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const gender_t& val) {
+	 return (out << val._g);
   }
 
 };
