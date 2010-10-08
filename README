@@ -26,3 +26,14 @@ constraint solver in order to solve the problem.
 The main aim of the program is to assess the feasibility of this
 approach.
 
+
+
+
+
+Dependencies:
+
+- CMake (>= 2.8)
+- Boost FileSystem, System, DateTime, and other
+  include-only libraries (tested with 1.40)
+- Apache Log4cxx (tested with 0.10.0)
+- optional: Google C++ Testing Framework (tested with 1.30)
