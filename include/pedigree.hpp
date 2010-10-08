@@ -36,7 +36,7 @@ template <typename T_GENOTYPE= genotype_t,
 			 typename T_HAPLOTYPE= haplotype_t,
 			 typename T_PHENOTYPE= std::string,
 			 typename T_ID=size_t>
-class basic_pedigree_t {
+class basic_pedigree_t: boost::noncopyable {
   friend class individual_t;
 public:
 
