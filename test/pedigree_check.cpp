@@ -293,3 +293,19 @@ TEST(pedigree, auto_creation) {
   ASSERT_THROW(ped.get_by_id(pedigree_t::not_existent_id),
 					assertion_failed_exception);
 }
+
+TEST(pedigree, phenotype) {
+  pedigree_t ped(4);
+
+  pedigree_t::individual_t& ind0= ped.get_by_id_or_create(100);
+  pedigree_t::individual_t& ind1= ped.get_by_id_or_create(101);
+  pedigree_t::individual_t& ind2= ped.get_by_id_or_create(102);
+
+  ind0.phenotype()= "0";
+  ind1.phenotype()= "100";
+  ind2.phenotype()= "-1";
+
+  ASSERT_EQ("0", ind0.phenotype());
+  ASSERT_EQ("100", ind1.phenotype());
+  ASSERT_EQ("-1", ind2.phenotype());
+}

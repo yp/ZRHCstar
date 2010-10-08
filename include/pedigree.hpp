@@ -25,10 +25,17 @@
 #include "gender.hpp"
 #include "haplotypes_genotypes.hpp"
 
+template <typename T>
+class not_existent_id_t {
+public:
+  static const T id;
+};
 
 
 template <typename T_GENOTYPE= genotype_t,
-			 class T_HAPLOTYPE= haplotype_t>
+			 typename T_HAPLOTYPE= haplotype_t,
+			 typename T_PHENOTYPE= std::string,
+			 typename T_ID=size_t>
 class basic_pedigree_t {
   friend class individual_t;
 public:
@@ -37,35 +44,38 @@ public:
 
   typedef T_GENOTYPE gen_t;
   typedef T_HAPLOTYPE hap_t;
+  typedef T_PHENOTYPE phen_t;
+  typedef T_ID id_t;
   typedef typename gen_t::base g;
   typedef typename hap_t::base h;
   typedef boost::ptr_vector<individual_t> individuals_t;
 
-  static const size_t not_existent_id= ULONG_MAX;
+  static const id_t not_existent_id;
+  static const size_t not_existent_progr;
 
   class individual_t: boost::noncopyable {
 	 friend class basic_pedigree_t;
   private:
-	 basic_pedigree_t<gen_t, hap_t>& _p;
+	 basic_pedigree_t<gen_t, hap_t, phen_t, id_t>& _p;
 	 const size_t _progr_id;
-	 individual_t(basic_pedigree_t<gen_t, hap_t>& p,
+	 individual_t(basic_pedigree_t<gen_t, hap_t, phen_t, id_t>& p,
 					  const size_t progr_id)
 		  : _p(p), _progr_id(progr_id)
 	 {}
 
   public:
-	 size_t id() const {
+	 const id_t& id() const {
 		return _p._real_ids[_progr_id];
 	 }
 	 size_t progr_id() const {
 		return _progr_id;
 	 }
-	 void set_id(const size_t& real_id) {
+	 void set_id(const id_t& real_id) {
 		TRACE("Changing id of individual " << _progr_id << " from " <<
 				(id()) << " to " << real_id);
 		MY_ASSERT((real_id == id()) ||
 					 (real_id == not_existent_id) ||
-					 (_p.get_progr_id(real_id) == not_existent_id));
+					 (_p.get_progr_id(real_id) == not_existent_progr));
 		if (id() != not_existent_id) {
 		  MY_ASSERT(_p.get_progr_id(id()) == _progr_id);
 		  _p._real2progr.erase(_p._real_ids[_progr_id]);
@@ -113,11 +123,18 @@ public:
 		return g()[pos];
 	 }
 
+	 const phen_t& phenotype() const {
+		return _p._pheno[_progr_id];
+	 }
+	 phen_t& phenotype() {
+		return _p._pheno[_progr_id];
+	 }
+
 	 bool has_father() const {
-		return _p._fathers[_progr_id]!=not_existent_id;
+		return _p._fathers[_progr_id]!=not_existent_progr;
 	 }
 	 bool has_mother() const {
-		return _p._mothers[_progr_id]!=not_existent_id;
+		return _p._mothers[_progr_id]!=not_existent_progr;
 	 }
 	 bool has_children() const {
 		return !(_p._children[_progr_id].empty());
@@ -145,13 +162,14 @@ private:
   const size_t _len;
 
   individuals_t _indivs;
-  std::vector<size_t> _real_ids;
+  std::vector<id_t> _real_ids;
   std::vector<gender_t> _genders;
-  std::map<size_t, size_t> _real2progr;
+  std::map<id_t, size_t> _real2progr;
 
   boost::ptr_vector<haplotype_t> _hp;
   boost::ptr_vector<haplotype_t> _hm;
   boost::ptr_vector<genotype_t> _g;
+  std::vector<std::string> _pheno;
 
   std::vector<size_t> _fathers;
   std::vector<size_t> _mothers;
@@ -161,11 +179,11 @@ protected:
 
   static log4cxx::LoggerPtr logger;
 
-  size_t get_progr_id(const int& real_id) const {
-	 std::map<size_t, size_t>::const_iterator it= _real2progr.find(real_id);
+  size_t get_progr_id(const id_t& real_id) const {
+	 typename std::map<id_t, size_t>::const_iterator it= _real2progr.find(real_id);
 	 if (it == _real2progr.end()) {
 		DEBUG("Identifier " << real_id << " not found!");
-		return not_existent_id;
+		return not_existent_progr;
 	 } else {
 		return it->second;
 	 }
@@ -191,8 +209,9 @@ public:
 	 _hp.push_back(new haplotype_t(_len));
 	 _hm.push_back(new haplotype_t(_len));
 	 _g.push_back(new genotype_t(_len));
-	 _fathers.push_back(not_existent_id);
-	 _mothers.push_back(not_existent_id);
+	 _pheno.push_back("");
+	 _fathers.push_back(not_existent_progr);
+	 _mothers.push_back(not_existent_progr);
 	 _children.push_back(std::list<size_t>());
 	 return _indivs.back();
   }
@@ -203,17 +222,17 @@ public:
 	 return _indivs[progr_id];
   }
 
-  individual_t& get_by_id(const size_t real_id) {
+  individual_t& get_by_id(const id_t& real_id) {
 	 TRACE("Getting individual with real_id = " << real_id);
 	 MY_ASSERT(real_id != not_existent_id);
 	 return get_by_progr(get_progr_id(real_id));
   }
 
-  individual_t& get_by_id_or_create(const size_t real_id) {
+  individual_t& get_by_id_or_create(const id_t& real_id) {
 	 TRACE("Searching for individual with real_id = " << real_id);
 	 MY_ASSERT(real_id != not_existent_id);
 	 size_t progr= get_progr_id(real_id);
-	 if (progr == not_existent_id) {
+	 if (progr == not_existent_progr) {
 		TRACE("Individual not found. Creating...");
 		individual_t& ind= add_individual();
 		ind.set_id(real_id);
@@ -224,7 +243,7 @@ public:
 	 }
   }
 
-  individual_t& operator[](const size_t real_id) {
+  individual_t& operator[](const id_t& real_id) {
 	 return get_by_id(real_id);
   }
 
@@ -236,21 +255,21 @@ public:
 			 << "mother: " << progr_mother_id << ").");
 	 MY_ASSERT(progr_id < _indivs.size());
 	 MY_ASSERT((progr_father_id < _indivs.size()) ||
-				  (progr_father_id == not_existent_id));
+				  (progr_father_id == not_existent_progr));
 	 MY_ASSERT((progr_mother_id < _indivs.size()) ||
-				  (progr_mother_id == not_existent_id));
-	 MY_ASSERT((_fathers[progr_id] == not_existent_id) ||
-				  (progr_father_id == not_existent_id) ||
+				  (progr_mother_id == not_existent_progr));
+	 MY_ASSERT((_fathers[progr_id] == not_existent_progr) ||
+				  (progr_father_id == not_existent_progr) ||
 				  (_fathers[progr_id] == progr_father_id));
-	 MY_ASSERT((_mothers[progr_id] == not_existent_id) ||
-				  (progr_mother_id == not_existent_id) ||
+	 MY_ASSERT((_mothers[progr_id] == not_existent_progr) ||
+				  (progr_mother_id == not_existent_progr) ||
 				  (_mothers[progr_id] == progr_mother_id));
-	 if (progr_father_id != not_existent_id) {
+	 if (progr_father_id != not_existent_progr) {
 		MY_ASSERT(_genders[progr_father_id].is_not_female());
 		_genders[progr_father_id]= gender_t::MALE;
 		_children[progr_father_id].push_back(progr_id);
 	 }
-	 if (progr_mother_id != not_existent_id) {
+	 if (progr_mother_id != not_existent_progr) {
 		MY_ASSERT(_genders[progr_mother_id].is_not_male());
 		_genders[progr_mother_id]= gender_t::FEMALE;
 		_children[progr_mother_id].push_back(progr_id);
@@ -259,20 +278,20 @@ public:
 	 _mothers[progr_id]= progr_mother_id;
   }
 
-  void add_trio_by_id(const size_t id,
-							 const size_t father_id,
-							 const size_t mother_id) {
+  void add_trio_by_id(const id_t& id,
+							 const id_t& father_id,
+							 const id_t& mother_id) {
 	 TRACE("Adding trio (" << id << ", "
 			 << "father: " << father_id << ", "
 			 << "mother: " << mother_id << ").");
 	 const size_t progr_id= get_progr_id(id);
 	 const size_t progr_father_id= get_progr_id(father_id);
 	 const size_t progr_mother_id= get_progr_id(mother_id);
-	 MY_ASSERT(progr_id != not_existent_id);
+	 MY_ASSERT(progr_id != not_existent_progr);
 	 MY_ASSERT((father_id == not_existent_id) ||
-				  (progr_father_id != not_existent_id));
+				  (progr_father_id != not_existent_progr));
 	 MY_ASSERT((mother_id == not_existent_id) ||
-				  (progr_mother_id != not_existent_id));
+				  (progr_mother_id != not_existent_progr));
 	 add_trio_by_progr(progr_id, progr_father_id, progr_mother_id);
   }
 
@@ -280,10 +299,17 @@ public:
 	 return _indivs;
   }
 
-  const size_t size() const {
+  size_t size() const {
 	 return _indivs.size();
   }
 
+};
+
+
+template <>
+class not_existent_id_t<size_t> {
+public:
+  static const size_t id= ULONG_MAX;
 };
 
 typedef basic_pedigree_t<> pedigree_t;
@@ -291,11 +317,18 @@ typedef basic_pedigree_t<> pedigree_t;
 
 
 
-template <typename T_GENOTYPE, typename T_HAPLOTYPE>
-log4cxx::LoggerPtr basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE>::logger(log4cxx::Logger::getLogger("pedigree"));
+template <typename T_GENOTYPE, typename T_HAPLOTYPE,
+			 typename T_PHENOTYPE, typename T_ID>
+log4cxx::LoggerPtr basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE,T_PHENOTYPE,T_ID>::logger(log4cxx::Logger::getLogger("pedigree"));
 
-template <typename T_GENOTYPE, typename T_HAPLOTYPE>
-const size_t basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE>::not_existent_id;
+template <typename T_GENOTYPE, typename T_HAPLOTYPE,
+			 typename T_PHENOTYPE, typename T_ID>
+const typename basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE,T_PHENOTYPE,T_ID>::id_t
+basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE,T_PHENOTYPE,T_ID>::not_existent_id= not_existent_id_t<id_t>::id;
+
+template <typename T_GENOTYPE, typename T_HAPLOTYPE,
+			 typename T_PHENOTYPE, typename T_ID>
+const size_t basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE,T_PHENOTYPE,T_ID>::not_existent_progr= ULONG_MAX;
 
 
 #endif // __PEDIGREE_HPP__
