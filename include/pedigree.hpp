@@ -331,4 +331,45 @@ template <typename T_GENOTYPE, typename T_HAPLOTYPE,
 const size_t basic_pedigree_t<T_GENOTYPE,T_HAPLOTYPE,T_PHENOTYPE,T_ID>::not_existent_progr= ULONG_MAX;
 
 
+template <
+  typename T_GENOTYPE= genotype_t,
+  typename T_HAPLOTYPE= haplotype_t,
+  typename T_PHENOTYPE= std::string,
+  typename T_ID= size_t,
+  typename T_VECTOR= boost::ptr_vector<basic_pedigree_t<T_GENOTYPE,
+																		  T_HAPLOTYPE,
+																		  T_PHENOTYPE,
+																		  T_ID>
+													>
+  >
+class basic_multifamily_pedigree_t {
+public:
+  typedef basic_pedigree_t<T_GENOTYPE,
+									T_HAPLOTYPE,
+									T_PHENOTYPE,
+									T_ID> pedigree_t;
+  typedef T_VECTOR type;
+
+private:
+  const size_t _len;
+  type _families;
+
+public:
+  basic_multifamily_pedigree_t(const size_t len)
+		:_len(len)
+  {}
+
+  pedigree_t& add_family() {
+	 _families.push_back(new pedigree_t(_len));
+	 return _families.back();
+  }
+
+  const type& families() {
+	 return _families;
+  }
+};
+
+typedef basic_multifamily_pedigree_t<> multifamily_pedigree_t;
+
+
 #endif // __PEDIGREE_HPP__
