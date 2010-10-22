@@ -53,6 +53,8 @@ find_package (Log4Cxx REQUIRED)
 include_directories(${Log4Cxx_INCLUDE_DIRS})
 link_directories(${Log4Cxx_LIBRARY_DIRS})
 
+set (CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_FLAGS_DEBUG "-Wall ${CMAKE_CXX_FLAGS_DEBUG}")
 
 include(ExtractSourceVersionFromGit)
 

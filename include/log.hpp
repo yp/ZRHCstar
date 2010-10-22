@@ -46,6 +46,8 @@
 #include <cstdlib>
 #include <log4cxx/logger.h>
 
+#include <typeinfo>
+
 
 int initialize_logger(void);
 
@@ -69,6 +71,26 @@ int initialize_logger(void);
 #define FATAL( msg ) _STD_LOG(FATAL, msg)
 
 
+#define _L_LOG( level, msg ) LOG4CXX_ ## level(this->logger(), msg)
+
+#define L_TRACE( msg ) _L_LOG(TRACE, msg)
+#define L_DEBUG( msg ) _L_LOG(DEBUG, msg)
+#define L_INFO(  msg ) _L_LOG(INFO, msg)
+#define L_WARN(  msg ) _L_LOG(WARN, msg)
+#define L_ERROR( msg ) _L_LOG(ERROR, msg)
+#define L_FATAL( msg ) _L_LOG(FATAL, msg)
+
+
+#define _Q_LOG(  logger, level, msg ) LOG4CXX_ ## level(logger, msg)
+
+#define Q_TRACE( logger, msg ) _Q_LOG(logger, TRACE, msg)
+#define Q_DEBUG( logger, msg ) _Q_LOG(logger, DEBUG, msg)
+#define Q_INFO(  logger, msg ) _Q_LOG(logger, INFO, msg)
+#define Q_WARN(  logger, msg ) _Q_LOG(logger, WARN, msg)
+#define Q_ERROR( logger, msg ) _Q_LOG(logger, ERROR, msg)
+#define Q_FATAL( logger, msg ) _Q_LOG(logger, FATAL, msg)
+
+
 #define _NAMED_LOG( level, name, msg ) LOG4CXX_ ## level(log4cxx::Logger::getLogger((name)), msg)
 
 #define N_TRACE( name, msg ) _NAMED_LOG( TRACE, name, msg)
@@ -78,5 +100,21 @@ int initialize_logger(void);
 #define N_ERROR( name, msg ) _NAMED_LOG( ERROR, name, msg)
 #define N_FATAL( name, msg ) _NAMED_LOG( FATAL, name, msg)
 
+template <typename T>
+inline const char* logger_name(void) {
+  return typeid(T).name();
+}
+
+template <class T>
+class log_able_t {
+protected:
+
+  static log4cxx::LoggerPtr& logger(void) {
+    static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger(logger_name<T>()));
+    return logger;
+  }
+
+
+};
 
 #endif // __LOG_HPP__

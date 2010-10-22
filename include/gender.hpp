@@ -40,56 +40,82 @@ class gender_t {
 
 private:
   enum gender_value {
-	 _UNSPEC= 0,
-	 _MALE= 1,
-	 _FEMALE= 2
+    _UNSPEC= 0,
+    _MALE= 1,
+    _FEMALE= 2
   } _g;
 
   explicit gender_t(gender_value g)
-		:_g(g)
-  {}
+    :_g(g)
+    {}
 
 public:
   static const gender_t UNSPEC, MALE, FEMALE;
 
   gender_t(const gender_t& base)
-		:_g(base._g)
-  {}
+    :_g(base._g)
+    {}
 
-  bool is_male() {
-	 return _g == _MALE;
+  gender_t()
+    :_g(_UNSPEC)
+    {};
+
+  bool is_male() const {
+    return _g == _MALE;
   }
 
-  bool is_female() {
-	 return _g == _FEMALE;
+  bool is_female() const {
+    return _g == _FEMALE;
   }
 
-  bool is_not_specified() {
-	 return _g == _UNSPEC;
+  bool is_not_specified() const {
+    return _g == _UNSPEC;
   }
 
-  bool is_not_male() {
-	 return _g != _MALE;
+  bool is_not_male() const {
+    return _g != _MALE;
   }
 
-  bool is_not_female() {
-	 return _g != _FEMALE;
+  bool is_not_female() const {
+    return _g != _FEMALE;
   }
 
-  bool is_specified() {
-	 return _g != _UNSPEC;
+  bool is_specified() const {
+    return _g != _UNSPEC;
   }
 
   friend bool operator==(const gender_t& g1, const gender_t& g2) {
-	 return g1._g==g2._g;
+    return g1._g==g2._g;
   }
 
   friend bool operator!=(const gender_t& g1, const gender_t& g2) {
-	 return g1._g!=g2._g;
+    return g1._g!=g2._g;
   }
 
   friend std::ostream& operator<<(std::ostream& out, const gender_t& val) {
-	 return (out << val._g);
+    return (out << val._g);
+  }
+
+  template <int C_MALE= 1,
+            int C_FEMALE= 2,
+            int C_UNSPEC= 0>
+  friend std::istream& operator>>(std::istream& in, gender_t& gender) {
+    int val;
+    if (in >> val) {
+      if (val == C_MALE) {
+        gender= MALE;
+      } else if (val == C_FEMALE) {
+        gender= FEMALE;
+      } else if (val == C_UNSPEC) {
+        gender= UNSPEC;
+      } else {
+        gender= UNSPEC;
+        in.setstate(std::ios::failbit);
+      }
+    } else {
+      gender= UNSPEC;
+    }
+    return in;
   }
 
 };
