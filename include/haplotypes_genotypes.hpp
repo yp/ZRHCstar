@@ -134,7 +134,24 @@ single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::enum_values[]= {
 };
 
 
+template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
+bool is_genotyped(const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>& g) {
+  return g != single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::MISS;
+}
 
+template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
+bool is_homozigous(const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>& g) {
+  return
+	 is_genotyped(g) &&
+	 (g != single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HETER);
+}
+
+template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
+bool is_heterozygous(const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>& g) {
+  return
+	 is_genotyped(g) &&
+	 (g == single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HETER);
+}
 
 /**
  *
