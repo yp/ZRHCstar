@@ -110,8 +110,8 @@ class log_able_t {
 protected:
 
   static log4cxx::LoggerPtr& logger(void) {
-    static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger(logger_name<T>()));
-    return logger;
+	 static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger(logger_name<T>()));
+	 return logger;
   }
 
 
