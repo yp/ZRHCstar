@@ -65,32 +65,32 @@ private:
   BOOST_STATIC_ASSERT( (0 <= T_HETER) && (T_HETER < 10));
   BOOST_STATIC_ASSERT( (0 <= T_MISS) && (T_MISS < 10));
   BOOST_STATIC_ASSERT( (T_HOMO1 != T_HOMO2) && (T_HOMO1 != T_HETER) &&
-                                                          (T_HOMO1 != T_MISS) && (T_HOMO2 != T_HETER) &&
-                                                          (T_HOMO2 != T_MISS) && (T_HETER != T_MISS) );
+							  (T_HOMO1 != T_MISS) && (T_HOMO2 != T_HETER) &&
+							  (T_HOMO2 != T_MISS) && (T_HETER != T_MISS) );
 
   typedef enum_like_t<single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>, 4, 3> base;
 
   enum _values {
-         _HOMO1= T_HOMO1,
-         _HOMO2= T_HOMO2,
-         _HETER= T_HETER,
-         _MISS= T_MISS
+	 _HOMO1= T_HOMO1,
+	 _HOMO2= T_HOMO2,
+	 _HETER= T_HETER,
+	 _MISS= T_MISS
   };
 
   single_biallelic_genotype_t(const int g)
-                : base(g)
+		: base(g)
   {
-         MY_ASSERT( (g == _HOMO1) ||
-                                (g == _HOMO2) ||
-                                (g == _HETER) ||
-                                (g == _MISS)
-                                );
+	 MY_ASSERT( (g == _HOMO1) ||
+					(g == _HOMO2) ||
+					(g == _HETER) ||
+					(g == _MISS)
+					);
   }
 
 public:
 
   single_biallelic_genotype_t()
-                : base(_MISS)
+		: base(_MISS)
   {}
 
   static const single_biallelic_genotype_t HOMO1;
@@ -102,8 +102,8 @@ public:
   static const single_biallelic_genotype_t enum_values[];
 };
 
-typedef single_biallelic_genotype_t<> std_single_biallelic_genotype_t;
 
+typedef single_biallelic_genotype_t<> std_single_biallelic_genotype_t;
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
 const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>
@@ -177,24 +177,24 @@ private:
   typedef enum_like_t<single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>, 3, 2> base;
 
   enum _values {
-         _ALLELE1= T_ALLELE1,
-         _ALLELE2= T_ALLELE2,
-         _MISS= T_MISS
+	 _ALLELE1= T_ALLELE1,
+	 _ALLELE2= T_ALLELE2,
+	 _MISS= T_MISS
   };
 
   single_biallelic_haplotype_t(const int h)
-                : base(h)
+		: base(h)
   {
-         MY_ASSERT( (h == _ALLELE1) ||
-                                (h == _ALLELE2) ||
-                                (h == _MISS)
-                                );
+	 MY_ASSERT( (h == _ALLELE1) ||
+					(h == _ALLELE2) ||
+					(h == _MISS)
+					);
   }
 
 public:
 
   single_biallelic_haplotype_t()
-                : base(_MISS)
+		: base(_MISS)
   {}
 
   static const single_biallelic_haplotype_t ALLELE1;
@@ -250,11 +250,11 @@ private:
   std::ostream& _out;
 public:
   default_base_writer_t(std::ostream& out)
-                : _out(out)
+		: _out(out)
   {}
 
   std::ostream& operator()(const base_t& val) {
-         return (_out << val);
+	 return (_out << val);
   }
 };
 
@@ -264,18 +264,18 @@ private:
   std::istream& _in;
 public:
   default_base_reader_t(std::istream& in)
-                : _in(in)
+		: _in(in)
   {}
 
   std::istream& operator()(base_t& val) {
-         return (_in >> val);
+	 return (_in >> val);
   }
 };
 
 
 template <class _base_t,
-          class _reader=default_base_reader_t<_base_t>,
-          class _writer=default_base_writer_t<_base_t> >
+			 class _reader=default_base_reader_t<_base_t>,
+			 class _writer=default_base_writer_t<_base_t> >
 class generic_fixlen_vector_t {
 public:
 
@@ -290,54 +290,54 @@ private:
 public:
 
   generic_fixlen_vector_t(const size_t len)
-                :_len(len), _v(new base[len])
+		:_len(len), _v(new base[len])
   {}
 
   generic_fixlen_vector_t(const std::vector<base> v)
-                :_len(v.size()), _v(new base[v.size()])
+		:_len(v.size()), _v(new base[v.size()])
   {
-         std::copy(v.begin(), v.end(), _v);
+	 std::copy(v.begin(), v.end(), _v);
   }
 
   ~generic_fixlen_vector_t() {
-         delete [] _v;
+	 delete [] _v;
   }
 
   const base& operator[](const size_t pos) const {
-         MY_ASSERT(pos < _len);
-         return _v[pos];
+	 MY_ASSERT(pos < _len);
+	 return _v[pos];
   }
 
   base& operator[](const size_t pos) {
-         MY_ASSERT(pos < _len);
-         return _v[pos];
+	 MY_ASSERT(pos < _len);
+	 return _v[pos];
   }
 
   base const * begin() const {
-         return _v;
+	 return _v;
   }
 
   base* begin() {
-         return _v;
+	 return _v;
   }
 
   base const * end() const {
-         return _v+_len;
+	 return _v+_len;
   }
 
   base * end() {
-         return _v+_len;
+	 return _v+_len;
   }
 
   friend std::ostream& operator<<(std::ostream& out,
-                                                                                         const generic_fixlen_vector_t& val) {
-         std::for_each(val._v, val._v+val._len, writer(out));
-         return out;
+											 const generic_fixlen_vector_t& val) {
+	 std::for_each(val._v, val._v+val._len, writer(out));
+	 return out;
   }
 
   friend std::istream& operator>>(std::istream& in, generic_fixlen_vector_t& val) {
-         std::for_each(val._v, val._v+val._len, reader(in));
-         return in;
+	 std::for_each(val._v, val._v+val._len, reader(in));
+	 return in;
   }
 
 };
