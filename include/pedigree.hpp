@@ -482,6 +482,11 @@ public:
   size_t size() const {
 	 return _families.size();
   }
+
+  size_t genotype_length() const {
+	 return _len;
+  }
+
 };
 
 typedef basic_multifamily_pedigree_t<> multifamily_pedigree_t;
