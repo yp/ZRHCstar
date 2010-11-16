@@ -5,14 +5,10 @@
 #
 cmake_minimum_required (VERSION 2.8)
 project (ZRHCstar)
+
 set (APPLICATION_NAME "Zero-Recombinant Haplotyping with missing genotypes")
 set (APPLICATION_CODENAME "${PROJECT_NAME}")
 set (APPLICATION_COPYRIGHT_YEARS "2010")
-set (APPLICATION_VERSION_MAJOR 1)
-set (APPLICATION_VERSION_MINOR 0)
-set (APPLICATION_VERSION_PATCH 0)
-set (APPLICATION_VERSION_TYPE SNAPSHOT)
-set (APPLICATION_VERSION_STRING "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}.${APPLICATION_VERSION_PATCH}-${APPLICATION_VERSION_TYPE}")
 set (APPLICATION_VENDOR_ID "org.tecnoparco")
 set (APPLICATION_VENDOR_NAME "Parco Tecnologico Padano")
 set (APPLICATION_VENDOR_URL "www.tecnoparco.org")
@@ -57,6 +53,7 @@ set (CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 -Wall ${CMAKE_CXX_FLAGS_DEBUG}")
 
 include(ExtractSourceVersionFromGit)
+set (APPLICATION_VERSION_STRING "${APPLICATION_SOURCE_VERSION}") # See the version from the 'git' repositories
 
 #
 # Configure Files
