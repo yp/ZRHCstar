@@ -36,10 +36,35 @@
 #define __UTILITY_HPP__
 
 #include <functional>
+#include <sstream>
 #include <iostream>
+#include <vector>
 
 #include "assertion.hpp"
 
+
+template <typename T>
+std::string tostr(const std::vector<T>& x) {
+  std::ostringstream out;
+  bool first= true;
+  for (typename std::vector<T>::const_iterator it= x.begin();
+		 it != x.end();
+		 ++it) {
+	 if (!first) {
+		out << " ";
+	 }
+	 out << *it;
+	 first= false;
+  }
+  return out.str();
+};
+
+template <typename T>
+std::string tostr(const T& x) {
+  std::ostringstream ostr;
+  ostr << x;
+  return ostr.str();
+};
 
 template <class T>
 class deleter_t
