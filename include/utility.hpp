@@ -36,6 +36,10 @@
 #define __UTILITY_HPP__
 
 #include <functional>
+#include <iostream>
+
+#include "assertion.hpp"
+
 
 template <class T>
 class deleter_t
@@ -90,15 +94,15 @@ protected:
 
 public:
   friend bool operator==(const derived_enum& e1, const derived_enum& e2) {
-	 return e1._d == e2._d;
+	 return e1.get_data() == e2.get_data();
   }
 
   friend bool operator!=(const derived_enum& e1, const derived_enum& e2) {
-	 return e1._d != e2._d;
+	 return e1.get_data() != e2.get_data();
   }
 
   friend std::ostream& operator<<(std::ostream& out, const derived_enum& val) {
-	 return (out << val._d);
+	 return (out << derived_enum::values[val.get_data()]);
   }
 
   friend std::istream& operator>>(std::istream& in, derived_enum& val) {
