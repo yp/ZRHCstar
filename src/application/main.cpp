@@ -34,6 +34,9 @@
 
 #include <iostream>
 
+#include "io-pedigree.hpp"
+#include "ped2cnf.hpp"
+
 using namespace std;
 
 class zrhcstar_application_t: public application_t {
@@ -47,6 +50,39 @@ public:
 protected:
 
   virtual int execution(int argc, char** argv) {
+	 std::string
+		str(
+			 "0 1 0 0 1 phenotype 1 1 2 2 2 2 2 2 1 1\n"
+			 "0 2 0 0 2 phenotype 2 2 1 1 1 1 1 1 1 1\n"
+			 "0 3 1 2 2 phenotype 1 2 0 0 1 2 1 2 1 1\n"
+			 "0 4 0 0 1 phenotype 1 2 1 2 1 1 1 1 0 0\n"
+			 "0 5 4 3 1 phenotype 1 2 1 2 0 0 1 1 1 2\n"
+			 // "1 1 0 0 1 phenotype 1 1 2 2 2 2 2 2 1 1\n"
+			 // "1 2 0 0 2 phenotype 2 2 1 1 1 1 1 1 1 1\n"
+			 // "1 3 1 2 2 phenotype 1 2 0 0 1 2 1 2 1 1\n"
+			 // "1 4 0 0 1 phenotype 1 2 1 2 1 1 1 1 0 0\n"
+			 // "1 5 4 3 1 phenotype 1 2 1 2 0 0 1 1 1 2\n"
+			 );
+	 std::istringstream is(str);
+
+	 biallelic_genotype_reader_t<> gr;
+	 plink_reader_t<> reader(gr);
+	 plink_reader_t<>::multifamily_pedigree_t ped;
+	 reader.read(is, ped);
+
+	 size_t i= 0;
+
+	 for (plink_reader_t<>::multifamily_pedigree_t::type::const_iterator it= ped.families().begin();
+			it != ped.families().end();
+			++it, ++i) {
+// Prepare the SAT instance
+		pedcnf_t cnf= ped2cnf(ped.families().front());
+
+// Output the instance
+		std::cout << "c === Family " << i << std::endl;
+		cnf.clauses_to_dimacs_format(std::cout);
+	 }
+
 
 	 return EXIT_SUCCESS;
   }
