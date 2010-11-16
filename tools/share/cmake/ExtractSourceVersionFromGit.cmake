@@ -47,10 +47,22 @@ endif (EXISTS "${DOTGIT}/HEAD")
 else (${GIT} MATCHES "GIT-NOTFOUND")
 
 message (STATUS "Executable 'git' found. Extracting log...")
+
+# Try 'git describe' and fallback to 'git log' if no tags are found
+
+execute_process (COMMAND git describe
+  RESULT_VARIABLE describe_ris
+  OUTPUT_VARIABLE APPLICATION_SOURCE_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_QUIET
+)
+
+if (NOT ${describe_ris} EQUAL 0)
 execute_process (COMMAND git log -n 1 --format=format:%H
   OUTPUT_VARIABLE APPLICATION_SOURCE_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+endif (NOT ${describe_ris} EQUAL 0)
 
 endif (${GIT} MATCHES "GIT-NOTFOUND")
 
