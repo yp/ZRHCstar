@@ -51,26 +51,51 @@ public:
 };
 
 template <int i, int default_index, class derived_enum>
-class static_switch {
+class static_str_switch {
 public:
-  static inline derived_enum EXEC(const char c) {
-	 if (c == '0'+derived_enum::values[i]) {
+  static inline derived_enum EXEC(const std::string& s) {
+	 if (s == derived_enum::str_values[i]) {
 		return derived_enum::enum_values[i];
 	 } else {
-		return static_switch< i-1, default_index, derived_enum>::EXEC(c);
+		return static_str_switch< i-1, default_index, derived_enum>::EXEC(s);
 	 }
   }
 };
 
 template <int default_index, class derived_enum>
-class static_switch<0, default_index, derived_enum> {
+class static_str_switch<0, default_index, derived_enum> {
 public:
-  static inline derived_enum EXEC(const char c) {
-	 if (c == '0'+derived_enum::values[0]) {
+  static inline derived_enum EXEC(const std::string& s) {
+	 if (s == derived_enum::str_values[0]) {
 		return derived_enum::enum_values[0];
 	 } else {
 		MY_FAIL;
 		return derived_enum::enum_values[default_index];
+	 }
+  }
+};
+
+template <int i, class derived_enum>
+class static_int_switch {
+public:
+  static inline int EXEC(const int v) {
+	 if (v == derived_enum::int_values[i]) {
+		return i;
+	 } else {
+		return static_int_switch< i-1, derived_enum>::EXEC(v);
+	 }
+  }
+};
+
+template <class derived_enum>
+class static_int_switch<0, derived_enum> {
+public:
+  static inline int EXEC(const int v) {
+	 if (v == derived_enum::int_values[0]) {
+		return 0;
+	 } else {
+		MY_FAIL;
+		return -1;
 	 }
   }
 };
@@ -84,31 +109,33 @@ private:
 
 protected:
 
-  enum_like_t(const int& d)
+  enum_like_t(const int d)
 		:_d(d)
-  {}
+  {
+	 MY_ASSERT((0 <= d) && (d<n_values));
+  }
 
-  int get_data() const {
+  int get_ordinal_data() const {
 	 return _d;
   }
 
 public:
   friend bool operator==(const derived_enum& e1, const derived_enum& e2) {
-	 return e1.get_data() == e2.get_data();
+	 return e1.get_ordinal_data() == e2.get_ordinal_data();
   }
 
   friend bool operator!=(const derived_enum& e1, const derived_enum& e2) {
-	 return e1.get_data() != e2.get_data();
+	 return e1.get_ordinal_data() != e2.get_ordinal_data();
   }
 
   friend std::ostream& operator<<(std::ostream& out, const derived_enum& val) {
-	 return (out << derived_enum::values[val.get_data()]);
+	 return (out << derived_enum::str_values[val.get_ordinal_data()]);
   }
 
   friend std::istream& operator>>(std::istream& in, derived_enum& val) {
 	 char h;
 	 if (in >> h) {
-		val= static_switch< n_values-1, default_index, derived_enum>::EXEC(h);
+		val= static_str_switch< n_values-1, default_index, derived_enum>::EXEC(std::string(1,h));
 	 } else {
 		MY_FAIL;
 		val= derived_enum::enum_values[default_index];

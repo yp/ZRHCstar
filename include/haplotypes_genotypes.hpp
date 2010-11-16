@@ -71,20 +71,15 @@ private:
   typedef enum_like_t<single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>, 4, 3> base;
 
   enum _values {
-	 _HOMO1= T_HOMO1,
-	 _HOMO2= T_HOMO2,
-	 _HETER= T_HETER,
-	 _MISS= T_MISS
+	 _HOMO1,
+	 _HOMO2,
+	 _HETER,
+	 _MISS
   };
 
   single_biallelic_genotype_t(const int g)
 		: base(g)
   {
-	 MY_ASSERT( (g == _HOMO1) ||
-					(g == _HOMO2) ||
-					(g == _HETER) ||
-					(g == _MISS)
-					);
   }
 
 public:
@@ -98,7 +93,8 @@ public:
   static const single_biallelic_genotype_t HETER;
   static const single_biallelic_genotype_t MISS;
 
-  static const int values[];
+  static const int int_values[];
+  static const std::string str_values[];
   static const single_biallelic_genotype_t enum_values[];
 };
 
@@ -107,22 +103,30 @@ typedef single_biallelic_genotype_t<> std_single_biallelic_genotype_t;
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
 const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>
-single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HOMO1(T_HOMO1);
+single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HOMO1(_HOMO1);
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
 const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>
-single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HOMO2(T_HOMO2);
+single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HOMO2(_HOMO2);
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
 const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>
-single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HETER(T_HETER);
+single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::HETER(_HETER);
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
 const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>
-single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::MISS(T_MISS);
+single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::MISS(_MISS);
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
-const int single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::values[]= {T_HOMO1, T_HOMO2, T_HETER, T_MISS};
+const int single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::int_values[]= {T_HOMO1, T_HOMO2, T_HETER, T_MISS};
+
+template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
+const std::string single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>::str_values[]= {
+  std::string(1, '0'+T_HOMO1),
+  std::string(1, '0'+T_HOMO2),
+  std::string(1, '0'+T_HETER),
+  std::string(1, '0'+T_MISS)
+};
 
 template <int T_HOMO1, int T_HOMO2, int T_HETER, int T_MISS>
 const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER, T_MISS>
@@ -177,18 +181,14 @@ private:
   typedef enum_like_t<single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>, 3, 2> base;
 
   enum _values {
-	 _ALLELE1= T_ALLELE1,
-	 _ALLELE2= T_ALLELE2,
-	 _MISS= T_MISS
+	 _ALLELE1,
+	 _ALLELE2,
+	 _MISS
   };
 
   single_biallelic_haplotype_t(const int h)
 		: base(h)
   {
-	 MY_ASSERT( (h == _ALLELE1) ||
-					(h == _ALLELE2) ||
-					(h == _MISS)
-					);
   }
 
 public:
@@ -201,7 +201,8 @@ public:
   static const single_biallelic_haplotype_t ALLELE2;
   static const single_biallelic_haplotype_t MISS;
 
-  static const int values[];
+  static const int int_values[];
+  static const std::string str_values[];
   static const single_biallelic_haplotype_t enum_values[];
 
 };
@@ -212,18 +213,29 @@ typedef single_biallelic_haplotype_t<> std_single_biallelic_haplotype_t;
 
 template <int T_ALLELE1, int T_ALLELE2, int T_MISS>
 const single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>
-single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::ALLELE1(T_ALLELE1);
+single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::ALLELE1(_ALLELE1);
 
 template <int T_ALLELE1, int T_ALLELE2, int T_MISS>
 const single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>
-single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::ALLELE2(T_ALLELE2);
+single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::ALLELE2(_ALLELE2);
 
 template <int T_ALLELE1, int T_ALLELE2, int T_MISS>
 const single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>
-single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::MISS(T_MISS);
+single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::MISS(_MISS);
 
 template <int T_ALLELE1, int T_ALLELE2, int T_MISS>
-const int single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::values[]= {T_ALLELE1, T_ALLELE2, T_MISS};
+const int single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::int_values[]= {
+  T_ALLELE1,
+  T_ALLELE2,
+  T_MISS
+};
+
+template <int T_ALLELE1, int T_ALLELE2, int T_MISS>
+const std::string single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>::str_values[]= {
+  std::string(1, '0'+T_ALLELE1),
+  std::string(1, '0'+T_ALLELE2),
+  std::string(1, '0'+T_MISS),
+};
 
 template <int T_ALLELE1, int T_ALLELE2, int T_MISS>
 const single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>
