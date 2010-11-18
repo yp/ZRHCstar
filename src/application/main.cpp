@@ -32,12 +32,15 @@
 #include "data.hpp"
 #include "utility.hpp"
 
-#include <iostream>
-
 #include "io-pedigree.hpp"
 #include "ped2cnf.hpp"
 
+#include <iostream>
+#include <fstream>
+
+
 using namespace std;
+
 
 class zrhcstar_application_t: public application_t {
 
@@ -47,43 +50,102 @@ public:
 		:application_t(APPLICATION_CODENAME " " APPLICATION_VERSION_STRING)
   {}
 
+private:
+
+  typedef plink_reader_t<>::multifamily_pedigree_t pedigree_t;
+
+  void prepare_pedigree_and_sat(const string& ped_file,
+										  pedigree_t& mped,
+										  pedcnf_t& cnf) const {
+// Open the file and read the pedigree
+	 ifstream is(ped_file);
+	 biallelic_genotype_reader_t<> gr;
+	 plink_reader_t<> reader(gr);
+	 reader.read(is, mped);
+
+	 if (mped.families().empty()) {
+		throw logic_error(string("No family has been read from file '")
+								+ ped_file + "'.");
+	 }
+	 if (mped.families().size() > 1) {
+		throw logic_error(string("The pedigree read from file '")
+								+ ped_file + "' has more than one family.");
+	 }
+
+// Prepare the SAT instance
+	 cnf= ped2cnf(mped.families().front());
+  }
+
+  void create_SAT_instance_from_pedigree(const string& ped_file,
+													  const string& sat_file) const {
+	 pedigree_t ped;
+	 pedcnf_t cnf;
+	 prepare_pedigree_and_sat(ped_file, ped, cnf);
+// Output the instance
+	 cnf.clauses_to_dimacs_format(std::cout);
+  }
+
 protected:
+
+  virtual po::options_description
+  get_named_options() const {
+	 po::options_description desc("Available options");
+	 desc.add_options()
+		("help,?", po::bool_switch(),
+		 "Produce (this) help message.")
+		("create,1", po::bool_switch(),
+		 "Create the SAT instance from the pedigree file.")
+		("read,2", po::bool_switch(),
+		 "Read the results produced by the SAT solver.")
+		("pedigree,p",
+		 po::value< std::string >()->default_value("pedigree.ped"),
+		 "File storing the genotyped pedigree.")
+		("sat,s",
+		 po::value< std::string >()->default_value("instance.cnf"),
+		 "File storing the SAT instance.")
+		("result,r",
+		 po::value< std::string >()->default_value("sat-result.txt"),
+		 "File storing the results produced by the SAT solver.")
+		("haplotypes,h",
+		 po::value< std::string >()->default_value("haplotypes.txt"),
+		 "File storing the computed haplotype configuration.")
+		;
+	 return desc;
+  };
 
   virtual int execution(int argc, char** argv,
 								const po::variables_map& vm) {
-	 std::string
-		str(
-			 "0 1 0 0 1 phenotype 1 1 2 2 2 2 2 2 1 1\n"
-			 "0 2 0 0 2 phenotype 2 2 1 1 1 1 1 1 1 1\n"
-			 "0 3 1 2 2 phenotype 1 2 0 0 1 2 1 2 1 1\n"
-			 "0 4 0 0 1 phenotype 1 2 1 2 1 1 1 1 0 0\n"
-			 "0 5 4 3 1 phenotype 1 2 1 2 0 0 1 1 1 2\n"
-			 // "1 1 0 0 1 phenotype 1 1 2 2 2 2 2 2 1 1\n"
-			 // "1 2 0 0 2 phenotype 2 2 1 1 1 1 1 1 1 1\n"
-			 // "1 3 1 2 2 phenotype 1 2 0 0 1 2 1 2 1 1\n"
-			 // "1 4 0 0 1 phenotype 1 2 1 2 1 1 1 1 0 0\n"
-			 // "1 5 4 3 1 phenotype 1 2 1 2 0 0 1 1 1 2\n"
-			 );
-	 std::istringstream is(str);
 
-	 biallelic_genotype_reader_t<> gr;
-	 plink_reader_t<> reader(gr);
-	 plink_reader_t<>::multifamily_pedigree_t ped;
-	 reader.read(is, ped);
-
-	 size_t i= 0;
-
-	 for (plink_reader_t<>::multifamily_pedigree_t::type::const_iterator it= ped.families().begin();
-			it != ped.families().end();
-			++it, ++i) {
-// Prepare the SAT instance
-		pedcnf_t cnf= ped2cnf(ped.families().front());
-
-// Output the instance
-		std::cout << "c === Family " << i << std::endl;
-		cnf.clauses_to_dimacs_format(std::cout);
+// Generate the help message and exit
+	 if (vm["help"].as<bool>()) {
+		cout << _name << endl;
+		cout << get_named_options() << endl;
+		return EXIT_SUCCESS;
 	 }
 
+// Check parameter values
+	 mode_options(vm, "create", "read");
+	 conflicting_options(vm, "create", "read");
+	 option_dependency(vm, "create", "pedigree");
+	 option_dependency(vm, "create", "sat");
+	 option_dependency(vm, "read", "pedigree");
+	 option_dependency(vm, "read", "result");
+	 option_dependency(vm, "read", "haplotypes");
+
+	 MY_ASSERT(vm["create"].as<bool>() != vm["read"].as<bool>());
+
+// Dispatch the work depending on the program parameters
+	 if (vm["create"].as<bool>()) {
+//    Creation of the SAT instance
+		create_SAT_instance_from_pedigree(vm["pedigree"].as<string>(),
+													 vm["sat"].as<string>());
+	 } else if (vm["read"].as<bool>()) {
+//    Computation of the haplotype configuration
+	 } else {
+// We should not arrive here
+		MY_FAIL;
+		throw logic_error(string("Modes have not been recognized."));
+	 }
 
 	 return EXIT_SUCCESS;
   }
