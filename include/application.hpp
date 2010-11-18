@@ -41,7 +41,7 @@ class application_t {
 
 protected:
 
-  std::string _name;
+  const std::string _name;
   log4cxx::LoggerPtr logger;
 
   virtual po::options_description
@@ -125,10 +125,10 @@ public:
 // Execute
 		result= execution(argc, argv, vm);
 	 } catch (std::exception& e) {
-		FATAL("Exception occurred: " << e.what() << ".");
+		FATAL("Exception occurred: " << e.what());
 		result= EXIT_FAILURE;
 	 } catch (assertion_failed_exception& e) {
-		FATAL("Assertion failed: " << e.what() << ".");
+		FATAL("Assertion failed: " << e.what());
 		result= EXIT_FAILURE;
 		throw e;
 	 } catch (...) {
