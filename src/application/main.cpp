@@ -49,7 +49,8 @@ public:
 
 protected:
 
-  virtual int execution(int argc, char** argv) {
+  virtual int execution(int argc, char** argv,
+								const po::variables_map& vm) {
 	 std::string
 		str(
 			 "0 1 0 0 1 phenotype 1 1 2 2 2 2 2 2 1 1\n"

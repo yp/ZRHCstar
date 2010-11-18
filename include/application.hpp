@@ -30,9 +30,12 @@
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/program_options.hpp>
 
 #include "log.hpp"
 #include "assertion.hpp"
+
+namespace po = boost::program_options;
 
 class application_t {
 
@@ -41,7 +44,53 @@ protected:
   std::string _name;
   log4cxx::LoggerPtr logger;
 
-  virtual int execution(int argc, char** argv) = 0;
+  virtual po::options_description
+  get_named_options() const {
+	 po::options_description desc;
+	 return desc;
+  };
+
+  virtual po::positional_options_description
+  get_positional_options() const {
+	 po::positional_options_description p;
+	 return p;
+  };
+
+// Function used to check that at least one of 'opt1' or 'opt2' are
+// specified.
+  void mode_options(const po::variables_map& vm,
+						  const char* opt1,
+						  const char* opt2) const {
+	 if (!vm[opt1].as<bool>() && !vm[opt2].as<bool>())
+		throw std::logic_error(std::string("At least one of the options '")
+									  + opt1 + "' or '" + opt2 + "' must be specified.");
+  }
+// Function used to check that 'opt1' and 'opt2' are not specified
+// at the same time.
+  void conflicting_options(const po::variables_map& vm,
+									const char* opt1,
+									const char* opt2) const {
+	 if (vm.count(opt1) && !vm[opt1].defaulted()
+		  && vm.count(opt2) && !vm[opt2].defaulted())
+		throw std::logic_error(std::string("Conflicting options '")
+									  + opt1 + "' and '" + opt2 + "'.");
+  }
+
+// Function used to check that of 'for_what' is specified, then
+//	'required_option' is specified too.
+  void option_dependency(const po::variables_map& vm,
+								 const char* for_what,
+								 const char* required_option) const {
+	 if (vm.count(for_what) && !vm[for_what].defaulted())
+		if (vm.count(required_option) == 0 || vm[required_option].defaulted())
+		  throw std::logic_error(std::string("Option '") + for_what
+										 + "' requires option '" + required_option + "'.");
+  }
+
+  virtual int execution(int argc,
+								char** argv,
+								const po::variables_map& vm) = 0;
+
 
 public:
   explicit application_t(const std::string& name)
@@ -62,7 +111,19 @@ public:
 
 	 int result= EXIT_SUCCESS;
 	 try {
-		result= execution(argc, argv);
+
+// Parse options
+		po::variables_map vm;
+		po::options_description desc= get_named_options();
+		po::positional_options_description p= get_positional_options();
+
+		po::store(po::command_line_parser(argc, argv).
+					 options(desc).positional(p).run(), vm);
+
+		po::notify(vm);
+
+// Execute
+		result= execution(argc, argv, vm);
 	 } catch (std::exception& e) {
 		FATAL("Exception occurred: " << e.what() << ".");
 		result= EXIT_FAILURE;
