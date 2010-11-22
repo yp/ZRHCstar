@@ -144,11 +144,11 @@ public:
 
   const varvec_t& vars() const {
 	 return _vars;
-  }
+  };
 
   const clauses_t& clauses() const {
 	 return _clauses;
-  }
+  };
 
   void add_clause(const clause_t& clause) {
 	 _clauses.insert(clause);
