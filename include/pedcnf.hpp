@@ -163,6 +163,8 @@ public:
 	 _clauses.insert(clause);
   };
 
+  bool is_satisfying_assignment() const;
+
   std::ostream& clauses_to_dimacs_format(std::ostream& out) const;
   std::ostream& clauses_to_dimacs_format(std::ostream& out,
 													  const std::string& note) const;

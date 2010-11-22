@@ -86,6 +86,38 @@ pedcnf_t::get_dummy(const int v1, const int v2) {
   return get_var(_dummy, ped_var_kind::DUMMY, v1, v2);
 };
 
+bool
+pedcnf_t::is_satisfying_assignment() const {
+  L_DEBUG("Checking if value assignment satisfies the clauses...");
+  MY_ASSERT( _vars.size() == _vals.size() );
+  bool ris= true;
+  BOOST_FOREACH(const clause_t& clause, _clauses) {
+	 if (ris) {
+		bool intris= false;
+		BOOST_FOREACH(const int& var, clause) {
+		  MY_ASSERT( var != 0 );
+		  MY_ASSERT( (size_t)abs(var) <= _vars.size() );
+		  if (var>0) {
+			 intris= intris || _vals[var-1];
+		  } else {
+			 intris= intris || !_vals[-var-1];
+		  }
+		}
+		if (!intris) {
+		  L_DEBUG("Clause " << tostr(clause) << " is not satisfied.");
+		}
+		ris= ris && intris;
+	 }
+  }
+  if (ris) {
+	 L_DEBUG("The assignment satisfies all the clauses.");
+  } else {
+	 L_DEBUG("The assignment does not satisfy all the clauses.");
+  }
+  return ris;
+};
+
+
 std::ostream&
 pedcnf_t::clauses_to_dimacs_format(std::ostream& out) const {
   return clauses_to_dimacs_format(out, "SAT instance");
