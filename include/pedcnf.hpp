@@ -187,6 +187,11 @@ public:
 	 return out.str();
   };
 
+// Read the assignment from a file like the following one:
+// SAT/UNSAT
+// 1 -2 3 4 0
+  bool assignment_from_minisat_format(std::istream& in);
+
 };
 
 

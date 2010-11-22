@@ -35,6 +35,7 @@
 #include "pedcnf.hpp"
 #include <iomanip>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 const ped_var_kind ped_var_kind::H(0);
 const ped_var_kind ped_var_kind::W(1);
@@ -150,6 +151,38 @@ pedcnf_t::clauses_to_dimacs_format(std::ostream& out,
 	 out << *it << std::endl;
   }
   return out;
+};
+
+
+// Read the assignment from a file like the following one:
+// SAT/UNSAT
+// 1 -2 3 4 0
+bool
+pedcnf_t::assignment_from_minisat_format(std::istream& in) {
+  std::string line;
+  std::getline(in, line);
+  boost::trim(line);
+  MY_ASSERT( (line == "SAT") || (line == "UNSAT") );
+  if (line == "UNSAT") {
+	 L_DEBUG("UNSATISFIABLE clauses.");
+	 return false;
+  } else if (line == "SAT") {
+	 L_DEBUG("Satisfiable clauses. Reading assignment...");
+	 std::getline(in, line);
+	 boost::trim(line);
+	 std::istringstream is(line);
+	 int value;
+	 while ((is >> value) && (value != 0)) {
+		MY_ASSERT( (size_t)abs(value) <= _vals.size() );
+		_vals[(size_t)abs(value)-1]= (value>0);
+	 }
+	 MY_ASSERT( ! (is >> value) ); // zero must be the last element
+	 MY_ASSERT( is_satisfying_assignment() );
+	 return true;
+  } else {
+	 MY_FAIL;
+  }
+  return false;
 };
 
 
