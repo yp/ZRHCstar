@@ -78,7 +78,10 @@ public:
 };
 
 
-class pedcnf_t {
+class pedcnf_t
+  :
+  public log_able_t<pedcnf_t>
+{
 
 // Types
 private:
@@ -90,6 +93,7 @@ public:
   typedef boost::tuple<ped_var_kind, size_t, size_t> pedvar_t;
   typedef std::map<index_var_t, int> varmap_t;
   typedef std::vector<pedvar_t> varvec_t;
+  typedef std::vector<bool> valvec_t;
   typedef std::set<int> clause_t;
   typedef std::set< clause_t > clauses_t;
 
@@ -102,6 +106,7 @@ private:
   varmap_t _dummy;
 
   varvec_t _vars;
+  valvec_t _vals;
 
   clauses_t _clauses;
 
@@ -144,6 +149,10 @@ public:
 
   const varvec_t& vars() const {
 	 return _vars;
+  };
+
+  const valvec_t& vals() const {
+	 return _vals;
   };
 
   const clauses_t& clauses() const {

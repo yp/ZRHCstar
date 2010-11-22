@@ -58,6 +58,7 @@ pedcnf_t::get_var(varmap_t& map,
   varmap_t::iterator it= map.find(boost::make_tuple(i1, i2));
   if (it == map.end()) {
 	 _vars.push_back(boost::make_tuple(var_kind, i1, i2));
+	 _vals.push_back(false);
 	 std::pair< varmap_t::iterator, bool> ret= map.insert(std::make_pair(boost::make_tuple(i1, i2), _vars.size()));
 	 MY_ASSERT(ret.second);
 	 it= ret.first;
