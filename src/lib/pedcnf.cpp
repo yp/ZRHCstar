@@ -34,6 +34,7 @@
 
 #include "pedcnf.hpp"
 #include <iomanip>
+#include <boost/foreach.hpp>
 
 const ped_var_kind ped_var_kind::H(0);
 const ped_var_kind ped_var_kind::W(1);
@@ -86,7 +87,21 @@ pedcnf_t::get_dummy(const int v1, const int v2) {
 
 std::ostream&
 pedcnf_t::clauses_to_dimacs_format(std::ostream& out) const {
-  out << "c SAT instance" << std::endl;
+  return clauses_to_dimacs_format(out, "SAT instance");
+}
+
+std::ostream&
+pedcnf_t::clauses_to_dimacs_format(std::ostream& out,
+											  const std::string& note) const {
+  return clauses_to_dimacs_format(out, std::vector< std::string >(1, note));
+}
+
+std::ostream&
+pedcnf_t::clauses_to_dimacs_format(std::ostream& out,
+											  const std::vector< std::string >& notes) const {
+  BOOST_FOREACH(const std::string& s, notes) {
+	 out << "c " << s << std::endl;
+  }
   out << "c" << std::endl;
   size_t i= 1;
   for (pedcnf_t::varvec_t::const_iterator it= _vars.begin();

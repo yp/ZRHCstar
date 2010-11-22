@@ -155,10 +155,24 @@ public:
   };
 
   std::ostream& clauses_to_dimacs_format(std::ostream& out) const;
+  std::ostream& clauses_to_dimacs_format(std::ostream& out,
+													  const std::string& note) const;
+  std::ostream& clauses_to_dimacs_format(std::ostream& out,
+													  const std::vector< std::string >& notes) const;
 
   std::string clauses_to_dimacs_format() const {
 	 std::ostringstream out;
 	 clauses_to_dimacs_format(out);
+	 return out.str();
+  };
+  std::string clauses_to_dimacs_format(const std::string& note) const {
+	 std::ostringstream out;
+	 clauses_to_dimacs_format(out, note);
+	 return out.str();
+  };
+  std::string clauses_to_dimacs_format(const std::vector< std::string > notes) const {
+	 std::ostringstream out;
+	 clauses_to_dimacs_format(out, notes);
 	 return out.str();
   };
 
