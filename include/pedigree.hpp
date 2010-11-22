@@ -236,7 +236,7 @@ protected:
   size_t get_progr_id(const id_t& real_id) const {
 	 typename std::map<id_t, size_t>::const_iterator it= _real2progr.find(real_id);
 	 if (it == _real2progr.end()) {
-		DEBUG("Identifier " << real_id << " not found!");
+		TRACE("Identifier " << real_id << " not found!");
 		return not_existent_progr;
 	 } else {
 		return it->second;
