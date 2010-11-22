@@ -97,7 +97,13 @@ private:
 		throw logic_error(string("Impossible to open file '") + sat_file
 								+ "' for writing the SAT instance.");
 	 }
-	 cnf.clauses_to_dimacs_format(out);
+	 const string headers[] = {
+		"SAT instance",
+		string("pedigree: ") + ped_file,
+		string("sat: ") + sat_file,
+		string("source version: ") + APPLICATION_SOURCE_VERSION
+	 };
+	 cnf.clauses_to_dimacs_format(out, vector<string>(headers, headers+4));
 	 out.close();
   }
 
