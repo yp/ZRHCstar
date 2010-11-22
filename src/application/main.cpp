@@ -59,9 +59,16 @@ private:
 										  pedcnf_t& cnf) const {
 // Open the file and read the pedigree
 	 ifstream is(ped_file);
+	 if (!is.is_open()) {
+		ERROR("Impossible to open pedigree file '" << ped_file << "'.");
+		throw logic_error(string("Impossible to open pedigree file '")
+								+ ped_file + "'.");
+	 }
+
 	 biallelic_genotype_reader_t<> gr;
 	 plink_reader_t<> reader(gr);
 	 reader.read(is, mped);
+	 is.close();
 
 	 if (mped.families().empty()) {
 		throw logic_error(string("No family has been read from file '")
