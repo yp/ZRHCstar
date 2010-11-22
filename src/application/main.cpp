@@ -89,7 +89,16 @@ private:
 	 pedcnf_t cnf;
 	 prepare_pedigree_and_sat(ped_file, ped, cnf);
 // Output the instance
-	 cnf.clauses_to_dimacs_format(std::cout);
+	 INFO("Saving the SAT instance to file '" << sat_file << "'.");
+	 ofstream out(sat_file);
+	 if (!out.is_open()) {
+		ERROR("Impossible to open file '" << sat_file
+				<< "' for writing the SAT instance.");
+		throw logic_error(string("Impossible to open file '") + sat_file
+								+ "' for writing the SAT instance.");
+	 }
+	 cnf.clauses_to_dimacs_format(out);
+	 out.close();
   }
 
 protected:
