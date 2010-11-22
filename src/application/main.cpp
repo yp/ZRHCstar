@@ -124,6 +124,7 @@ protected:
 	 }
 
 // Check parameter values
+	 DEBUG("Checking program parameters...");
 	 mode_options(vm, "create", "read");
 	 conflicting_options(vm, "create", "read");
 	 option_dependency(vm, "create", "pedigree");
@@ -133,14 +134,22 @@ protected:
 	 option_dependency(vm, "read", "haplotypes");
 
 	 MY_ASSERT(vm["create"].as<bool>() != vm["read"].as<bool>());
+	 DEBUG("Check completed.");
 
 // Dispatch the work depending on the program parameters
 	 if (vm["create"].as<bool>()) {
 //    Creation of the SAT instance
+		INFO("Creation of the SAT instance from the pedigree of file '"
+			  << vm["pedigree"].as<string>() << "'.");
+
 		create_SAT_instance_from_pedigree(vm["pedigree"].as<string>(),
 													 vm["sat"].as<string>());
 	 } else if (vm["read"].as<bool>()) {
 //    Computation of the haplotype configuration
+		INFO("Computation of the haplotype configuration from the pedigree of file '"
+			  << vm["pedigree"].as<string>()
+			  << "' and the results of the SAT solver stored in file '"
+			  << vm["result"].as<string>() << "'.");
 	 } else {
 // We should not arrive here
 		MY_FAIL;

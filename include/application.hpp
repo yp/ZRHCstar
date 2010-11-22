@@ -61,6 +61,8 @@ protected:
   void mode_options(const po::variables_map& vm,
 						  const char* opt1,
 						  const char* opt2) const {
+	 TRACE("Checking alternative options '" << opt1 <<
+			 "' and '" << opt2 << "'.");
 	 if (!vm[opt1].as<bool>() && !vm[opt2].as<bool>())
 		throw std::logic_error(std::string("At least one of the options '")
 									  + opt1 + "' or '" + opt2 + "' must be specified.");
@@ -70,6 +72,8 @@ protected:
   void conflicting_options(const po::variables_map& vm,
 									const char* opt1,
 									const char* opt2) const {
+	 TRACE("Checking conflicting options '" << opt1 <<
+			 "' and '" << opt2 << "'.");
 	 if (vm.count(opt1) && !vm[opt1].defaulted()
 		  && vm.count(opt2) && !vm[opt2].defaulted())
 		throw std::logic_error(std::string("Conflicting options '")
@@ -81,6 +85,8 @@ protected:
   void option_dependency(const po::variables_map& vm,
 								 const char* for_what,
 								 const char* required_option) const {
+	 TRACE("Checking dependency between options '" << for_what <<
+			 "' and '" << required_option << "'.");
 	 if (vm.count(for_what) && !vm[for_what].defaulted())
 		if (vm.count(required_option) == 0 || vm[required_option].defaulted())
 		  throw std::logic_error(std::string("Option '") + for_what
@@ -112,6 +118,7 @@ public:
 	 int result= EXIT_SUCCESS;
 	 try {
 
+		DEBUG("Parsing the program parameters.");
 // Parse options
 		po::variables_map vm;
 		po::options_description desc= get_named_options();
@@ -123,7 +130,9 @@ public:
 		po::notify(vm);
 
 // Execute
+		DEBUG("Beginning execution.");
 		result= execution(argc, argv, vm);
+		DEBUG("Execution completed.");
 	 } catch (std::exception& e) {
 		FATAL("Exception occurred: " << e.what());
 		result= EXIT_FAILURE;
