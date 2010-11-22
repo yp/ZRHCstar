@@ -65,10 +65,12 @@ private:
 								+ ped_file + "'.");
 	 }
 
+	 INFO("Reading pedigree from file '" << ped_file << "'...");
 	 biallelic_genotype_reader_t<> gr;
 	 plink_reader_t<> reader(gr);
 	 reader.read(is, mped);
 	 is.close();
+	 INFO("Pedigree successfully read from file '" << ped_file << "'.");
 
 	 if (mped.families().empty()) {
 		throw logic_error(string("No family has been read from file '")
@@ -80,7 +82,9 @@ private:
 	 }
 
 // Prepare the SAT instance
+	 INFO("Preparing SAT instance from pedigree...");
 	 cnf= ped2cnf(mped.families().front());
+	 INFO("SAT instance successfully prepared.");
   }
 
   void create_SAT_instance_from_pedigree(const string& ped_file,
@@ -89,13 +93,13 @@ private:
 	 pedcnf_t cnf;
 	 prepare_pedigree_and_sat(ped_file, ped, cnf);
 // Output the instance
-	 INFO("Saving the SAT instance to file '" << sat_file << "'.");
+	 INFO("Saving SAT instance to file '" << sat_file << "'...");
 	 ofstream out(sat_file);
 	 if (!out.is_open()) {
 		ERROR("Impossible to open file '" << sat_file
-				<< "' for writing the SAT instance.");
+				<< "' for writing SAT instance.");
 		throw logic_error(string("Impossible to open file '") + sat_file
-								+ "' for writing the SAT instance.");
+								+ "' for writing SAT instance.");
 	 }
 	 const string headers[] = {
 		"SAT instance",
@@ -105,6 +109,8 @@ private:
 	 };
 	 cnf.clauses_to_dimacs_format(out, vector<string>(headers, headers+4));
 	 out.close();
+	 INFO("SAT instance successfully saved to file '" << sat_file << "'.");
+  }
   }
 
 protected:
@@ -162,16 +168,19 @@ protected:
 	 if (vm["create"].as<bool>()) {
 //    Creation of the SAT instance
 		INFO("Creation of the SAT instance from the pedigree of file '"
-			  << vm["pedigree"].as<string>() << "'.");
+			  << vm["pedigree"].as<string>() << "'...");
 
 		create_SAT_instance_from_pedigree(vm["pedigree"].as<string>(),
 													 vm["sat"].as<string>());
+		INFO("SAT instance successfully created and saved.");
 	 } else if (vm["read"].as<bool>()) {
 //    Computation of the haplotype configuration
-		INFO("Computation of the haplotype configuration from the pedigree of file '"
+		INFO("Computation of the haplotype configuration from the "
+			  "pedigree of file '"
 			  << vm["pedigree"].as<string>()
 			  << "' and the results of the SAT solver stored in file '"
-			  << vm["result"].as<string>() << "'.");
+			  << vm["result"].as<string>() << "'...");
+		INFO("Haplotype configuration successfully computed and saved.");
 	 } else {
 // We should not arrive here
 		MY_FAIL;

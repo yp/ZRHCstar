@@ -118,7 +118,7 @@ public:
 	 int result= EXIT_SUCCESS;
 	 try {
 
-		DEBUG("Parsing the program parameters.");
+		DEBUG("Parsing program parameters...");
 // Parse options
 		po::variables_map vm;
 		po::options_description desc= get_named_options();
@@ -128,25 +128,27 @@ public:
 					 options(desc).positional(p).run(), vm);
 
 		po::notify(vm);
+		DEBUG("Program parameters successfully parsed.");
 
 // Execute
-		DEBUG("Beginning execution.");
+		DEBUG("Beginning execution...");
 		result= execution(argc, argv, vm);
-		DEBUG("Execution completed.");
+		DEBUG("Execution successfully completed.");
+
 	 } catch (std::exception& e) {
-		FATAL("Exception occurred: " << e.what());
+		FATAL("EXCEPTION OCCURRED: " << e.what());
 		result= EXIT_FAILURE;
 	 } catch (assertion_failed_exception& e) {
-		FATAL("Assertion failed: " << e.what());
+		FATAL("ASSERTION FAILED: " << e.what());
 		result= EXIT_FAILURE;
 		throw e;
 	 } catch (...) {
-		FATAL("Generic exception occurred.");
+		FATAL("GENERIC EXCEPTION OCCURRED.");
 		result= EXIT_FAILURE;
 	 }
 
 	 boost::posix_time::ptime time_end(boost::posix_time::second_clock::local_time());
-	 DEBUG("Running time:        " << (time_end-time_start));
+	 INFO("Running time:        " << (time_end-time_start));
 	 INFO(_name << " - terminated at " << time_end);
 
 	 return result;
