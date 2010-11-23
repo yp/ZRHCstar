@@ -107,3 +107,53 @@ TEST(pedigree, read_eq_write) {
 
   ASSERT_EQ(str, os.str());
 }
+
+
+TEST(pedigree, write_haplotypes) {
+  biallelic_haplotype_pair_writer_t<> hpw;
+  plink_haplotype_writer_t<> writer(hpw, " ", "|");
+  plink_haplotype_writer_t<>::multifamily_pedigree_t mped(3);
+  plink_haplotype_writer_t<>::multifamily_pedigree_t::pedigree_t& ped= mped.add_family();
+
+  pedigree_t::individual_t& ind0= ped.add_individual(1);
+  pedigree_t::individual_t& ind1= ped.add_individual(2);
+  pedigree_t::individual_t& ind2= ped.add_individual(3);
+  ind0.phenotype()= "phenotype1";
+  ind1.phenotype()= "phenotype2";
+  ind2.phenotype()= "phenotype3";
+  ped.add_trio_by_id(1, 2, 3);
+
+  ind0.hp(0)= pedigree_t::h::ALLELE1;
+  ind0.hp(1)= pedigree_t::h::ALLELE2;
+  ind0.hp(2)= pedigree_t::h::MISS;
+
+  ind0.hm(0)= pedigree_t::h::ALLELE2;
+  ind0.hm(1)= pedigree_t::h::ALLELE1;
+  ind0.hm(2)= pedigree_t::h::MISS;
+
+  ind1.hp(0)= pedigree_t::h::MISS;
+  ind1.hp(1)= pedigree_t::h::ALLELE2;
+  ind1.hp(2)= pedigree_t::h::ALLELE2;
+
+  ind1.hm(0)= pedigree_t::h::MISS;
+  ind1.hm(1)= pedigree_t::h::ALLELE2;
+  ind1.hm(2)= pedigree_t::h::ALLELE2;
+
+  ind2.hp(0)= pedigree_t::h::MISS;
+  ind2.hp(1)= pedigree_t::h::ALLELE1;
+  ind2.hp(2)= pedigree_t::h::ALLELE2;
+
+  ind2.hm(0)= pedigree_t::h::MISS;
+  ind2.hm(1)= pedigree_t::h::ALLELE1;
+  ind2.hm(2)= pedigree_t::h::ALLELE2;
+
+  std::ostringstream os;
+  writer.write(os, mped);
+
+  std::string is("0 3 0 0 2 phenotype3 0|0 1|1 2|2\n"
+					  "0 2 0 0 1 phenotype2 0|0 2|2 2|2\n"
+					  "0 1 2 3 0 phenotype1 1|2 2|1 0|0\n");
+
+  ASSERT_EQ(is, os.str());
+
+}
