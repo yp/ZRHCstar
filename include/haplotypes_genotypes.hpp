@@ -168,7 +168,7 @@ bool is_heterozygous(const single_biallelic_genotype_t<T_HOMO1, T_HOMO2, T_HETER
  **/
 
 
-template <int T_ALLELE1= 0, int T_ALLELE2= 1, int T_MISS= 5>
+template <int T_ALLELE1= 1, int T_ALLELE2= 2, int T_MISS= 0>
 class single_biallelic_haplotype_t
   :public enum_like_t<single_biallelic_haplotype_t<T_ALLELE1, T_ALLELE2, T_MISS>, 3, 2> {
 private:

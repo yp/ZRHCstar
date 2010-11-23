@@ -92,7 +92,7 @@ TEST(haplotype, io) {
 
   haplotype_t h(4);
 
-  std::string is= "0515";
+  std::string is= "1020";
   std::istringstream in(is);
   in >> h;
 
@@ -107,7 +107,7 @@ TEST(haplotype, io_fail) {
 
   haplotype_t h(4);
 
-  std::string is= "0152";
+  std::string is= "1205";
   std::istringstream in(is);
   ASSERT_THROW({ in >> h; }, assertion_failed_exception);
 }
@@ -122,7 +122,7 @@ TEST(haplotype, limits) {
 
 TEST(haplotype, access) {
 
-  std::string is= "510";
+  std::string is= "021";
   haplotype_t h(3);
 
   h[1]= haplotype_t::base::ALLELE2;
