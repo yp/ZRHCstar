@@ -117,14 +117,14 @@ protected:
 
 
 
-template <typename T_BASE_GENOTYPE>
-class basic_genotype_writer_t
-:public log_able_t< basic_genotype_writer_t< T_BASE_GENOTYPE > >
+template <typename T_BASE>
+class basic_vector_writer_t
+:public log_able_t< basic_vector_writer_t< T_BASE > >
 {
 protected:
 
-  virtual void encode_next(std::ostream& genotype_stream,
-                           const T_BASE_GENOTYPE& g,
+  virtual void encode_next(std::ostream& vector_stream,
+                           const T_BASE& v,
                            const std::string& sep= " ") const = 0;
 
 public:
@@ -138,29 +138,29 @@ public:
   }
 
   template <typename T>
-  void encode(std::ostream& genotype_stream,
+  void encode(std::ostream& vector_stream,
               const T& begin,
               const T& end,
               const std::string& sep= " ") const {
     for(T it= begin; it != end; ++it) {
       if (it != begin) {
-        genotype_stream << sep;
+        vector_stream << sep;
       }
-      encode_next(genotype_stream, *it, sep);
+      encode_next(vector_stream, *it, sep);
     }
   }
 
   template <typename T>
-  std::string encode(const T& genotype,
+  std::string encode(const T& vector,
                      const std::string& sep= " ") const {
-    return encode(genotype.begin(), genotype.end(), sep);
+    return encode(vector.begin(), vector.end(), sep);
   }
 
   template <typename T>
-  void encode(std::ostream& genotype_stream,
-              const T& genotype,
+  void encode(std::ostream& vector_stream,
+              const T& vector,
               const std::string& sep= " ") const {
-    encode(genotype_stream, genotype.begin(), genotype.end(), sep);
+    encode(vector_stream, vector.begin(), vector.end(), sep);
   }
 };
 
@@ -169,10 +169,10 @@ template <
   int T_ALLELE1= 1, int T_ALLELE2= 2, int T_ALLELEMISS= 0,
   int T_HOMO1= 0, int T_HOMO2= 1, int T_HETER= 2, int T_MISS= 5>
 class biallelic_genotype_writer_t
-  :public basic_genotype_writer_t< single_biallelic_genotype_t< T_HOMO1,
-                                                                T_HOMO2,
-                                                                T_HETER,
-                                                                T_MISS>
+  :public basic_vector_writer_t< single_biallelic_genotype_t< T_HOMO1,
+																				  T_HOMO2,
+																				  T_HETER,
+																				  T_MISS>
                                    >
 {
 protected:

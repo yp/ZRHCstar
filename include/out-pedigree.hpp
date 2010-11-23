@@ -109,7 +109,7 @@ class plink_writer_t
 
 private:
 
-  basic_genotype_writer_t<typename T_GENOTYPE::base>& _gw;
+  basic_vector_writer_t<typename T_GENOTYPE::base>& _gw;
 
   const std::string _sep;
 
@@ -118,7 +118,7 @@ private:
 
 public:
   plink_writer_t(
-    basic_genotype_writer_t<typename T_GENOTYPE::base>& gw,
+    basic_vector_writer_t<typename T_GENOTYPE::base>& gw,
     const std::string& sep="\t"
     )
     :_gw(gw), _sep(sep)
