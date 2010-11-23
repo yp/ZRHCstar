@@ -223,7 +223,7 @@ private:
   boost::ptr_vector<haplotype_t> _hp;
   boost::ptr_vector<haplotype_t> _hm;
   boost::ptr_vector<genotype_t> _g;
-  std::vector<std::string> _pheno;
+  std::vector<phen_t> _pheno;
 
   std::vector<size_t> _fathers;
   std::vector<size_t> _mothers;
@@ -272,7 +272,7 @@ public:
 	 _hp.push_back(new haplotype_t(_len));
 	 _hm.push_back(new haplotype_t(_len));
 	 _g.push_back(new genotype_t(_len));
-	 _pheno.push_back("");
+	 _pheno.push_back(phen_t());
 	 _fathers.push_back(not_existent_progr);
 	 _mothers.push_back(not_existent_progr);
 	 _children.push_back(std::list<size_t>());
