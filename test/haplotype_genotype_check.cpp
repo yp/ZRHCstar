@@ -164,3 +164,40 @@ TEST(haplotype, writer) {
 
 }
 
+
+TEST(haplotype, pair_writer) {
+
+  typedef generic_fixlen_vector_t< single_biallelic_haplotype_t< 1, 2, 0 > > my_haplotype_t;
+
+  my_haplotype_t h1(9);
+  my_haplotype_t h2(9);
+
+  size_t i= 0;
+  for (size_t i1= 0; i1 < my_haplotype_t::base::N_VALUES; ++i1) {
+	 for (size_t i2= 0; i2 < my_haplotype_t::base::N_VALUES; ++i2, ++i) {
+		h1[i]= my_haplotype_t::base::enum_values[i1];
+		h2[i]= my_haplotype_t::base::enum_values[i2];
+	 }
+  }
+
+  {
+	 std::string is= "1|1 1|2 1|0 2|1 2|2 2|0 0|1 0|2 0|0";
+
+	 std::ostringstream out;
+	 biallelic_haplotype_pair_writer_t<1,2,0> bw;
+	 bw.encode(out, h1, h2);
+
+	 ASSERT_EQ( is, out.str() );
+  }
+
+  {
+	 std::string is= "1%1-1%2-1%0-2%1-2%2-2%0-0%1-0%2-0%0";
+
+	 std::ostringstream out;
+	 biallelic_haplotype_pair_writer_t<1,2,0> bw;
+	 bw.encode(out, h1, h2, "-", "%");
+
+	 ASSERT_EQ( is, out.str() );
+  }
+
+}
