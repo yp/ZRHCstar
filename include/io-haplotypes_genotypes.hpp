@@ -199,4 +199,37 @@ protected:
 
 };
 
+
+
+
+template <
+  int T_ALLELE1= 1, int T_ALLELE2= 2, int T_ALLELEMISS= 0
+>
+class biallelic_haplotype_writer_t
+  :public basic_vector_writer_t< single_biallelic_haplotype_t< T_ALLELE1,
+																					T_ALLELE2,
+																					T_ALLELEMISS >
+											>
+{
+protected:
+  typedef single_biallelic_haplotype_t< T_ALLELE1,
+													 T_ALLELE2,
+													 T_ALLELEMISS > h_t;
+
+  virtual void encode_next(std::ostream& haplotype_stream,
+									const h_t& h,
+									const std::string& sep= " ") const {
+	 if        ( h == h_t::ALLELE1 ) {
+		haplotype_stream << T_ALLELE1;
+	 } else if ( h == h_t::ALLELE2 ) {
+		haplotype_stream << T_ALLELE2;
+	 } else if ( h == h_t::MISS ) {
+		haplotype_stream << T_ALLELEMISS;
+	 } else {
+		MY_FAIL;
+	 }
+  };
+
+};
+
 #endif // __IO_HAPLOTYPES_GENOTYPES_HPP__
