@@ -127,24 +127,27 @@ public:
 
 
 
-template <class derived_enum, int n_values, int default_index>
+template <class derived_enum, size_t n_values, int default_index>
 class enum_like_t {
 private:
   int _d;
 
 protected:
 
-  enum_like_t(const int d)
+  enum_like_t(const size_t d)
 		:_d(d)
   {
 	 MY_ASSERT((0 <= d) && (d<n_values));
   }
 
-  int get_ordinal_data() const {
+  size_t get_ordinal_data() const {
 	 return _d;
   }
 
 public:
+
+  const static size_t N_VALUES= n_values;
+
   friend bool operator==(const derived_enum& e1, const derived_enum& e2) {
 	 return e1.get_ordinal_data() == e2.get_ordinal_data();
   }
