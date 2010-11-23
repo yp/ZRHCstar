@@ -111,6 +111,26 @@ private:
 	 out.close();
 	 INFO("SAT instance successfully saved to file '" << sat_file << "'.");
   }
+
+  void compute_HC_from_SAT_results(const string& ped_file,
+											  const string& result_file,
+											  const string& hap_file) const {
+	 pedigree_t ped;
+	 pedcnf_t cnf;
+	 prepare_pedigree_and_sat(ped_file, ped, cnf);
+
+// Open the result file and read the assignment
+	 ifstream is(result_file);
+	 if (!is.is_open()) {
+		ERROR("Impossible to open SAT result file '" << result_file << "'.");
+		throw logic_error(string("Impossible to open SAT result file '")
+								+ result_file + "'.");
+	 }
+
+	 INFO("Reading SAT results from file '" << result_file << "'...");
+	 const bool is_sat= cnf.assignment_from_minisat_format(is);
+	 is.close();
+	 INFO("SAT results successfully read from file '" << result_file << "'.");
   }
 
 protected:
@@ -180,6 +200,9 @@ protected:
 			  << vm["pedigree"].as<string>()
 			  << "' and the results of the SAT solver stored in file '"
 			  << vm["result"].as<string>() << "'...");
+		compute_HC_from_SAT_results(vm["pedigree"].as<string>(),
+											 vm["result"].as<string>(),
+											 vm["haplotypes"].as<string>());
 		INFO("Haplotype configuration successfully computed and saved.");
 	 } else {
 // We should not arrive here

@@ -119,7 +119,7 @@ protected:
 
 template <typename T_BASE_GENOTYPE>
 class basic_genotype_writer_t
-:public log_able_t< basic_genotype_reader_t< T_BASE_GENOTYPE > >
+:public log_able_t< basic_genotype_writer_t< T_BASE_GENOTYPE > >
 {
 protected:
 
