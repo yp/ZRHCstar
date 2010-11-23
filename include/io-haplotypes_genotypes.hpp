@@ -232,4 +232,113 @@ protected:
 
 };
 
+
+
+template <typename T_BASE>
+class basic_double_vector_writer_t
+:public basic_vector_writer_t< T_BASE >
+{
+protected:
+
+  virtual void encode_next(std::ostream& vector_stream,
+									const T_BASE& v1,
+									const T_BASE& v2,
+									const std::string& insep= "|") const = 0;
+
+public:
+  template <typename T>
+  std::string encode(const T& begin1,
+							const T& end1,
+							const T& begin2,
+							const T& end2,
+							const std::string& outsep= " ",
+							const std::string& insep= "|") const {
+	 std::ostringstream os;
+	 encode(os, begin1, end1, begin2, end2, outsep, insep);
+	 return os.str();
+  }
+
+  template <typename T>
+  void encode(std::ostream& vector_stream,
+				  const T& begin1,
+				  const T& end1,
+				  const T& begin2,
+				  const T& end2,
+				  const std::string& outsep= " ",
+				  const std::string& insep= "|") const {
+	 T it1= begin1;
+	 T it2= begin2;
+	 for(; it1 != end1; ++it1, ++it2) {
+		MY_ASSERT( it2 != end2 );
+		if (it1 != begin1) {
+		  MY_ASSERT( it2 != begin2 );
+		  vector_stream << outsep;
+		}
+		encode_next(vector_stream, *it1, *it2, insep);
+	 }
+	 MY_ASSERT( (it1 == end1) && (it2 == end2) );
+  }
+
+  template <typename T>
+  std::string encode(const T& vector1,
+							const T& vector2,
+							const std::string& outsep= " ",
+							const std::string& insep= "|") const {
+	 return encode(vector1.begin(), vector1.end(),
+						vector2.begin(), vector2.end(),
+						outsep, insep);
+  }
+
+  template <typename T>
+  void encode(std::ostream& vector_stream,
+				  const T& vector1,
+				  const T& vector2,
+				  const std::string& outsep= " ",
+				  const std::string& insep= "|") const {
+	 encode(vector_stream,
+			  vector1.begin(), vector1.end(),
+			  vector2.begin(), vector2.end(),
+			  outsep, insep);
+  }
+};
+
+template <
+  int T_ALLELE1= 1, int T_ALLELE2= 2, int T_ALLELEMISS= 0
+>
+class biallelic_haplotype_pair_writer_t
+  :public basic_double_vector_writer_t< single_biallelic_haplotype_t< T_ALLELE1,
+																							 T_ALLELE2,
+																							 T_ALLELEMISS >
+													 >
+{
+protected:
+  typedef single_biallelic_haplotype_t< T_ALLELE1,
+													 T_ALLELE2,
+													 T_ALLELEMISS > h_t;
+
+  virtual void encode_next(std::ostream& haplotype_stream,
+									const h_t& h,
+									const std::string& sep= " ") const {
+	 if        ( h == h_t::ALLELE1 ) {
+		haplotype_stream << T_ALLELE1;
+	 } else if ( h == h_t::ALLELE2 ) {
+		haplotype_stream << T_ALLELE2;
+	 } else if ( h == h_t::MISS ) {
+		haplotype_stream << T_ALLELEMISS;
+	 } else {
+		MY_FAIL;
+	 }
+  };
+
+  virtual void encode_next(std::ostream& haplotype_stream,
+									const h_t& h1,
+									const h_t& h2,
+									const std::string& insep= "|") const {
+	 encode_next(haplotype_stream, h1, "");
+	 haplotype_stream << insep;
+	 encode_next(haplotype_stream, h2, "");
+  };
+
+};
+
 #endif // __IO_HAPLOTYPES_GENOTYPES_HPP__
