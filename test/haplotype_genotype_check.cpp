@@ -27,6 +27,7 @@
 #include <gtest/gtest.h>
 
 #include "haplotypes_genotypes.hpp"
+#include "io-haplotypes_genotypes.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -139,4 +140,27 @@ TEST(haplotype, access) {
 
 }
 
+TEST(haplotype, writer) {
+
+  std::string is= "0 2 1";
+
+  typedef generic_fixlen_vector_t< single_biallelic_haplotype_t< 1, 2, 0 > > my_haplotype_t;
+
+  my_haplotype_t h(3);
+
+  h[0]= my_haplotype_t::base::MISS;
+  h[1]= my_haplotype_t::base::ALLELE2;
+  h[2]= my_haplotype_t::base::ALLELE1;
+
+  std::ostringstream out;
+  biallelic_haplotype_writer_t<1,2,0> bw;
+  bw.encode(out, h);
+
+  ASSERT_EQ( is, out.str() );
+
+  ASSERT_EQ( h[0], my_haplotype_t::base::MISS );
+  ASSERT_EQ( h[1], my_haplotype_t::base::ALLELE2 );
+  ASSERT_EQ( h[2], my_haplotype_t::base::ALLELE1 );
+
+}
 
