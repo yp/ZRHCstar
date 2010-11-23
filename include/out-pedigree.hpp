@@ -211,4 +211,126 @@ protected:
 
 };
 
+
+template <
+  typename T_GENOTYPE= genotype_t,
+  typename T_HAPLOTYPE= haplotype_t,
+  typename T_PHENOTYPE= std::string,
+  typename T_ID= size_t,
+  typename T_VECTOR= boost::ptr_vector<basic_pedigree_t<T_GENOTYPE,
+																		  T_HAPLOTYPE,
+																		  T_PHENOTYPE,
+																		  T_ID>
+													>
+  >
+class plink_haplotype_writer_t
+  :public basic_out_multifamily_pedigree_t<T_GENOTYPE, T_HAPLOTYPE,
+														 T_PHENOTYPE, T_ID, T_VECTOR>
+{
+
+private:
+
+  basic_double_vector_writer_t<typename T_HAPLOTYPE::base>& _dvw;
+
+  const std::string _outsep;
+  const std::string _insep;
+
+  typedef basic_out_multifamily_pedigree_t<T_GENOTYPE, T_HAPLOTYPE,
+														 T_PHENOTYPE, T_ID, T_VECTOR> base_t;
+
+public:
+  plink_haplotype_writer_t(
+					basic_double_vector_writer_t<typename T_HAPLOTYPE::base>& dvw,
+					const std::string& outsep=" ",
+					const std::string& insep="|")
+		:_dvw(dvw), _outsep(outsep), _insep(insep)
+  {}
+
+
+protected:
+
+  virtual const std::string get_brief_description_impl() const {
+	 return "plink-haplo-fmt";
+  }
+
+  virtual const std::string get_long_description_impl() const {
+	 return "PLINK haplo format";
+  }
+
+  virtual const std::string get_format_impl() const {
+	 return "plink-hap";
+  }
+
+  void write_single_family(std::ostream& out,
+									const std::string& id_fam,
+									const typename base_t::multifamily_pedigree_t::pedigree_t& ped) const {
+// Perform a topological ordering of individuals
+	 std::vector<bool> visited(ped.size(), false);
+	 std::vector<size_t> order;
+	 std::stack<size_t> stack;
+	 for (typename base_t::multifamily_pedigree_t::pedigree_t::individuals_t::const_iterator it= ped.individuals().begin();
+			it != ped.individuals().end();
+			++it) {
+		if (!visited[it->progr_id()]) {
+		  stack.push(it->progr_id());
+		}
+		while (!stack.empty()) {
+		  size_t cid= stack.top();
+		  stack.pop();
+		  MY_ASSERT(!visited[cid]);
+		  const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& ind= ped.get_by_progr(cid);
+		  if (ind.has_mother() &&
+				!visited[ind.mother().progr_id()]) {
+			 stack.push(cid);
+			 stack.push(ind.mother().progr_id());
+		  } else if (ind.has_father() &&
+						 !visited[ind.father().progr_id()]) {
+			 stack.push(cid);
+			 stack.push(ind.father().progr_id());
+		  } else {
+			 L_TRACE("Adding " << cid << " to the queue.");
+			 visited[cid]= true;
+			 order.push_back(cid);
+		  }
+		}
+	 }
+	 for (std::vector<size_t>::const_iterator it= order.begin();
+			it != order.end();
+			++it) {
+		const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& ind= ped.get_by_progr(*it);
+		out << id_fam << _outsep;
+		out << ind.id() << _outsep;
+		if (ind.has_father()) {
+		  out << ind.father().id() << _outsep;
+		} else {
+		  out << missing_id_t<T_ID>::id() << _outsep;
+		}
+		if (ind.has_mother()) {
+		  out << ind.mother().id() << _outsep;
+		} else {
+		  out << missing_id_t<T_ID>::id() << _outsep;
+		}
+		out << ind.gender() << _outsep;
+		out << ind.phenotype() << _outsep;
+		_dvw.encode(out, ind.hp(), ind.hm(), _outsep, _insep);
+		out << std::endl;
+	 }
+
+  }
+
+  virtual void write_impl(std::ostream& out,
+								  const multifamily_pedigree_t& ped) const {
+	 size_t i= 0;
+	 for (multifamily_pedigree_t::type::const_iterator it= ped.families().begin();
+			it != ped.families().end();
+			++it) {
+		std::ostringstream os;
+		os << i;
+		write_single_family(out, os.str(), *it);
+		++i;
+	 }
+  }
+
+};
+
 #endif // __OUT_PEDIGREE_HPP__
