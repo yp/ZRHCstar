@@ -69,16 +69,22 @@ public:
   }
 };
 
-
 template <typename T_GENOTYPE= genotype_t,
 			 typename T_HAPLOTYPE= haplotype_t,
 			 typename T_PHENOTYPE= std::string,
 			 typename T_ID=size_t>
 class basic_pedigree_t: boost::noncopyable {
-  friend class individual_t;
 public:
-
+  friend class individual_t;
+  friend class individuals_t;
   class individual_t;
+  class individuals_t;
+
+private:
+
+  typedef boost::ptr_vector<individual_t> individuals_impl_t;
+
+public:
 
   typedef T_GENOTYPE gen_t;
   typedef T_HAPLOTYPE hap_t;
@@ -86,7 +92,61 @@ public:
   typedef T_ID id_t;
   typedef typename gen_t::base g;
   typedef typename hap_t::base h;
-  typedef boost::ptr_vector<individual_t> individuals_t;
+
+  class individuals_t:
+	 public boost::noncopyable {
+	 friend class basic_pedigree_t;
+  private:
+	 basic_pedigree_t<gen_t, hap_t, phen_t, id_t>* _p;
+	 individuals_t(basic_pedigree_t<gen_t, hap_t, phen_t, id_t>* p)
+		  : _p(p)
+	 {}
+  public:
+	 typedef typename individuals_impl_t::iterator iterator;
+
+	 iterator begin() {
+		return _p->_indivs.begin();
+	 };
+
+	 iterator end() {
+		return _p->_indivs.end();
+	 };
+
+	 typedef typename individuals_impl_t::reverse_iterator reverse_iterator;
+
+	 reverse_iterator rbegin() {
+		return _p->_indivs.rbegin();
+	 };
+
+	 reverse_iterator rend() {
+		return _p->_indivs.rend();
+	 };
+
+	 typedef typename individuals_impl_t::const_iterator const_iterator;
+
+	 const_iterator begin() const {
+		return _p->_indivs.begin();
+	 };
+
+	 const_iterator end() const {
+		return _p->_indivs.end();
+	 };
+
+	 typedef typename individuals_impl_t::const_reverse_iterator const_reverse_iterator;
+
+	 const_reverse_iterator rbegin() const {
+		return _p->_indivs.rbegin();
+	 };
+
+	 const_reverse_iterator rend() const {
+		return _p->_indivs.rend();
+	 };
+
+	 size_t size() const {
+		return _p->_indivs.size();
+	 };
+
+  };
 
   static const id_t not_existent_id;
   static const size_t not_existent_progr;
@@ -215,7 +275,8 @@ private:
 
   size_t _len;
 
-  individuals_t _indivs;
+  individuals_impl_t _indivs;
+  individuals_t _individuals;
   std::vector<id_t> _real_ids;
   std::vector<gender_t> _genders;
   std::map<id_t, size_t> _real2progr;
@@ -246,7 +307,7 @@ protected:
 public:
 
   basic_pedigree_t(const size_t len=0)
-		:_len(len)
+		:_len(len), _individuals(this)
   {
 	 TRACE("Created an empty pedigree with genotype/haplotype length equal to " << _len);
   }
@@ -387,7 +448,11 @@ public:
   }
 
   const individuals_t& individuals() const {
-	 return _indivs;
+	 return _individuals;
+  }
+
+  individuals_t& individuals() {
+	 return _individuals;
   }
 
   size_t size() const {

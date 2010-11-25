@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -146,12 +147,11 @@ protected:
     std::vector<bool> visited(ped.size(), false);
     std::vector<size_t> order;
     std::stack<size_t> stack;
-    for (typename base_t::multifamily_pedigree_t::pedigree_t::individuals_t::const_iterator it= ped.individuals().begin();
-         it != ped.individuals().end();
-         ++it) {
-      if (!visited[it->progr_id()]) {
-        stack.push(it->progr_id());
-      }
+	 BOOST_FOREACH( const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& it_ind,
+						 ped.individuals() ) {
+		if (!visited[it_ind.progr_id()]) {
+		  stack.push(it_ind.progr_id());
+		}
       while (!stack.empty()) {
         size_t cid= stack.top();
         stack.pop();
@@ -268,11 +268,10 @@ protected:
 	 std::vector<bool> visited(ped.size(), false);
 	 std::vector<size_t> order;
 	 std::stack<size_t> stack;
-	 for (typename base_t::multifamily_pedigree_t::pedigree_t::individuals_t::const_iterator it= ped.individuals().begin();
-			it != ped.individuals().end();
-			++it) {
-		if (!visited[it->progr_id()]) {
-		  stack.push(it->progr_id());
+	 BOOST_FOREACH( const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& it_ind,
+						 ped.individuals() ) {
+		if (!visited[it_ind.progr_id()]) {
+		  stack.push(it_ind.progr_id());
 		}
 		while (!stack.empty()) {
 		  size_t cid= stack.top();
