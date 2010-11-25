@@ -60,6 +60,7 @@ public:
 private:
 
   typedef plink_reader_t<>::multifamily_pedigree_t pedigree_t;
+  typedef pedigree_t::pedigree_t family_t;
 
   void prepare_pedigree_and_sat(const string& ped_file,
 										  pedigree_t& mped,
@@ -119,7 +120,107 @@ private:
 	 INFO("SAT instance successfully saved to file '" << sat_file << "'.");
   };
 
-  void compute_HC_from_SAT_results(const string& ped_file,
+  void compute_ZRHC(pedigree_t& mped,
+						  const pedcnf_t& cnf) const {
+	 INFO("Computing the zero-recombinant haplotype configuration...");
+	 MY_ASSERT( mped.families().size() == 1 );
+	 family_t& ped= mped.families().front();
+// For each locus in each individual:
+//   (1) the locus is genotyped and it is homozygous (thus the haplotype
+//       is 'fixed'), or
+//   (2) there exists a H_i[j] variable in the SAT instance.
+	 BOOST_FOREACH( family_t::individual_t& ind,
+						 ped.individuals() ) {
+		TRACE("Considering individual " << ind.progr_id());
+		for (size_t locus= 0; locus < ped.genotype_length(); ++locus) {
+		  if ( ! is_genotyped(ind.g(locus)) ) {
+//        Individual not genotyped ->
+//          -> imputing genotype based on variables w_i_l and h_i_l
+			 TRACE("Individual " << ind.progr_id() << " at locus " << locus
+					 << " is not genotyped.");
+// FIXME: Some variables could not exist.
+			 bool hil= cnf.h(ind.progr_id(), locus);
+			 bool wil= cnf.w(ind.progr_id(), locus);
+				TRACE("hil " << hil << "   wil " << wil);
+			 if ( ! wil) {
+				DEBUG("Not-genotyped individual " << ind.progr_id() <<
+						" at locus " << locus << " is imputed as homozygous.");
+				if ( ! hil ) {
+				  ind.g(locus)= family_t::g::HOMO1;
+				} else {
+				  ind.g(locus)= family_t::g::HOMO2;
+				}
+			 } else {
+				DEBUG("Not-genotyped individual " << ind.progr_id() <<
+						" at locus " << locus << " is imputed as heterozygous.");
+				ind.g(locus)= family_t::g::HETER;
+			 }
+		  }
+		  if ( is_genotyped(ind.g(locus)) ) {
+			 if ( is_homozigous(ind.g(locus)) ) {
+//          Individual genotyped and homozygous ->
+//            -> haplotype is fixed and predetermined
+				TRACE("Individual " << ind.progr_id() << " at locus " << locus
+						<< " is genotyped and homozygous.");
+				ind.hp(locus)= ind.hm(locus)=
+				  homozygous_to_haplotype<family_t::h, family_t::g>(ind.g(locus));
+			 } else {
+//          Individual genotyped and heterozygous ->
+//            -> haplotype depends on variable h_i_l
+				MY_ASSERT( is_heterozygous(ind.g(locus)) );
+				TRACE("Individual " << ind.progr_id() << " at locus " << locus
+						<< " is genotyped and heterozygous.");
+				bool hil= cnf.h(ind.progr_id(), locus);
+				if ( ! hil) {
+				  ind.hp(locus)= family_t::h::ALLELE1;
+				  ind.hm(locus)= family_t::h::ALLELE2;
+				} else {
+				  ind.hp(locus)= family_t::h::ALLELE2;
+				  ind.hm(locus)= family_t::h::ALLELE1;
+				}
+			 }
+		  } else {
+			 MY_FAIL;
+		  }
+		}
+	 }
+	 INFO("Zero-recombinant haplotype configuration successfully computed.");
+  };
+
+
+  void save_ZRHC(pedigree_t& ped,
+					  const string& hap_file) const {
+	 INFO("Saving haplotype configuration to file '" << hap_file << "'...");
+// FIXME: Improve template instantiation
+	 biallelic_haplotype_pair_writer_t<> hpw;
+	 plink_haplotype_writer_t<> writer(hpw, "\t", "|");
+	 ofstream os(hap_file);
+	 if (!os.is_open()) {
+		ERROR("Impossible to open haplotype result file '" << hap_file << "'.");
+		throw logic_error(string("Impossible to open haplotype result file '")
+								+ hap_file + "'.");
+	 }
+	 writer.write(os, ped);
+	 os.close();
+	 INFO("Haplotype configuration successfully saved.");
+  };
+
+  bool read_SAT_results(pedcnf_t& cnf,
+								const string& result_file) const {
+	 INFO("Reading SAT results from file '" << result_file << "'...");
+	 ifstream is(result_file);
+	 if (!is.is_open()) {
+		ERROR("Impossible to open SAT result file '" << result_file << "'.");
+		throw logic_error(string("Impossible to open SAT result file '")
+								+ result_file + "'.");
+	 }
+	 const bool is_sat= cnf.assignment_from_minisat_format(is);
+	 is.close();
+	 INFO("SAT results successfully read from file '" << result_file << "'.");
+	 return is_sat;
+  };
+
+  bool compute_HC_from_SAT_results(const string& ped_file,
 											  const string& result_file,
 											  const string& hap_file) const {
 	 pedigree_t ped;
@@ -127,17 +228,21 @@ private:
 	 prepare_pedigree_and_sat(ped_file, ped, cnf);
 
 // Open the result file and read the assignment
-	 ifstream is(result_file);
-	 if (!is.is_open()) {
-		ERROR("Impossible to open SAT result file '" << result_file << "'.");
-		throw logic_error(string("Impossible to open SAT result file '")
-								+ result_file + "'.");
-	 }
+	 const bool is_sat= read_SAT_results(cnf, result_file);
 
-	 INFO("Reading SAT results from file '" << result_file << "'...");
-	 const bool is_sat= cnf.assignment_from_minisat_format(is);
-	 is.close();
-	 INFO("SAT results successfully read from file '" << result_file << "'.");
+	 if (is_sat) {
+		INFO("The pedigree can be realized by a zero-recombinant haplotype "
+			  "configuration.");
+// Compute the actual haplotype configuration
+		compute_ZRHC(ped, cnf);
+// Output the haplotype configuration
+		save_ZRHC(ped, hap_file);
+	 } else {
+		INFO("The pedigree CANNOT be realized by a zero-recombinant haplotype "
+			  "configuration.");
+// Do nothing
+	 }
+	 return is_sat;
   }
 
 protected:
@@ -210,10 +315,19 @@ protected:
 			  << vm["pedigree"].as<string>()
 			  << "' and the results of the SAT solver stored in file '"
 			  << vm["result"].as<string>() << "'...");
-		compute_HC_from_SAT_results(vm["pedigree"].as<string>(),
-											 vm["result"].as<string>(),
-											 vm["haplotypes"].as<string>());
-		INFO("Haplotype configuration successfully computed and saved.");
+		bool is_zrhc= compute_HC_from_SAT_results(
+											vm["pedigree"].as<string>(),
+											vm["result"].as<string>(),
+											vm["haplotypes"].as<string>());
+		if (is_zrhc) {
+		  INFO("Zero-Recombinant Haplotype Configuration successfully "
+				 "computed and saved.");
+		  main_ris= EXIT_SUCCESS;
+		} else {
+		  INFO("No Zero-Recombinant Haplotype Configuration can exist. "
+				 "Exiting without haplotype configuration.");
+		  main_ris= EXIT_NO_ZRHC;
+		}
 	 } else {
 // We should not arrive here
 		MY_FAIL;
