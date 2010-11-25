@@ -110,7 +110,7 @@ private:
 	 cnf.clauses_to_dimacs_format(out, vector<string>(headers, headers+4));
 	 out.close();
 	 INFO("SAT instance successfully saved to file '" << sat_file << "'.");
-  }
+  };
 
   void compute_HC_from_SAT_results(const string& ped_file,
 											  const string& result_file,
