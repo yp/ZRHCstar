@@ -38,6 +38,13 @@
 #include <iostream>
 #include <fstream>
 
+#include <boost/static_assert.hpp>
+
+#ifndef EXIT_NO_ZRHC
+#define EXIT_NO_ZRHC (2)
+#endif
+
+BOOST_STATIC_ASSERT(EXIT_FAILURE != EXIT_NO_ZRHC);
 
 using namespace std;
 
@@ -171,6 +178,8 @@ protected:
 		return EXIT_SUCCESS;
 	 }
 
+	 int main_ris= EXIT_SUCCESS;
+
 // Check parameter values
 	 DEBUG("Checking program parameters...");
 	 mode_options(vm, "create", "read");
@@ -193,6 +202,7 @@ protected:
 		create_SAT_instance_from_pedigree(vm["pedigree"].as<string>(),
 													 vm["sat"].as<string>());
 		INFO("SAT instance successfully created and saved.");
+		main_ris= EXIT_SUCCESS;
 	 } else if (vm["read"].as<bool>()) {
 //    Computation of the haplotype configuration
 		INFO("Computation of the haplotype configuration from the "
@@ -210,7 +220,7 @@ protected:
 		throw logic_error(string("Modes have not been recognized."));
 	 }
 
-	 return EXIT_SUCCESS;
+	 return main_ris;
   }
 
 };
