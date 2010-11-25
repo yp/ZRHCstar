@@ -120,6 +120,12 @@ private:
 				  const ped_var_kind& var_kind,
 				  const size_t i1, const size_t i2);
 
+  int get_var(const varmap_t& map,
+				  const size_t i1, const size_t i2) const;
+
+  bool get_val(const varmap_t& map,
+					const size_t i1, const size_t i2) const;
+
 
 public:
 
@@ -130,6 +136,30 @@ public:
   int get_s(const size_t p, const size_t i);
 
   int get_dummy(const int v1, const int v2);
+
+  int get_h(const size_t i, const size_t l) const;
+
+  int get_w(const size_t i, const size_t l) const;
+
+  int get_s(const size_t p, const size_t i) const;
+
+  int get_dummy(const int v1, const int v2) const;
+
+  bool h(const size_t i, const size_t l) const {
+	 return get_val(_h, i, l);
+  };
+
+  bool w(const size_t i, const size_t l) const {
+	 return get_val(_w, i, l);
+  };
+
+  bool s(const size_t p, const size_t i) const {
+	 return get_val(_s, p, i);
+  };
+
+  bool dummy(const int v1, const int v2) const {
+	 return get_val(_dummy, v1, v2);
+  };
 
   const varmap_t& h() const {
 	 return _h;

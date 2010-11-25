@@ -67,6 +67,25 @@ pedcnf_t::get_var(varmap_t& map,
   return it->second;
 };
 
+inline int
+pedcnf_t::get_var(const varmap_t& map,
+						const size_t i1, const size_t i2) const {
+  varmap_t::const_iterator it= map.find(boost::make_tuple(i1, i2));
+  if (it == map.end()) {
+	 return -1;
+  } else {
+	 return it->second;
+  }
+};
+
+bool
+pedcnf_t::get_val(const varmap_t& map,
+						const size_t i1, const size_t i2) const {
+  int var= get_var(map, i1, i2);
+  MY_ASSERT( (0 < var) && ((size_t)var <= _vals.size()) );
+  return _vals[var-1];
+};
+
 int
 pedcnf_t::get_h(const size_t i, const size_t l) {
   return get_var(_h, ped_var_kind::H, i, l);
@@ -85,6 +104,26 @@ pedcnf_t::get_s(const size_t p, const size_t i) {
 int
 pedcnf_t::get_dummy(const int v1, const int v2) {
   return get_var(_dummy, ped_var_kind::DUMMY, v1, v2);
+};
+
+int
+pedcnf_t::get_h(const size_t i, const size_t l) const {
+  return get_var(_h, i, l);
+};
+
+int
+pedcnf_t::get_w(const size_t i, const size_t l) const {
+  return get_var(_w, i, l);
+};
+
+int
+pedcnf_t::get_s(const size_t p, const size_t i) const {
+  return get_var(_s, p, i);
+};
+
+int
+pedcnf_t::get_dummy(const int v1, const int v2) const {
+  return get_var(_dummy, v1, v2);
 };
 
 bool
