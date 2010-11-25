@@ -146,6 +146,18 @@ protected:
 
 public:
 
+  enum_like_t(const derived_enum& copy)
+		: _d(copy.get_ordinal_data())
+  {
+	 MY_ASSERT( copy.get_ordinal_data() <n_values );
+  };
+
+  const derived_enum&
+  operator=(const derived_enum& copy) {
+	 _d= copy.get_ordinal_data();
+	 return *this;
+  };
+
   const static size_t N_VALUES= n_values;
 
   friend bool operator==(const derived_enum& e1, const derived_enum& e2) {
