@@ -42,7 +42,6 @@
 
 #include <iostream>
 #include <algorithm>
-#include <iterator>
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -172,10 +171,8 @@ protected:
         }
       }
     }
-    for (std::vector<size_t>::const_iterator it= order.begin();
-         it != order.end();
-         ++it) {
-        const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& ind= ped.get_by_progr(*it);
+	 BOOST_FOREACH ( const size_t val, order ) {
+		const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& ind= ped.get_by_progr(val);
         out << id_fam << _sep;
         out << ind.id() << _sep;
         if (ind.has_father()) {
@@ -199,12 +196,11 @@ protected:
   virtual void write_impl(std::ostream& out,
                           const multifamily_pedigree_t& ped) const {
     size_t i= 0;
-    for (multifamily_pedigree_t::type::const_iterator it= ped.families().begin();
-         it != ped.families().end();
-         ++it) {
+	 BOOST_FOREACH( const multifamily_pedigree_t::pedigree_t& family,
+						 ped.families() ) {
       std::ostringstream os;
       os << i;
-      write_single_family(out, os.str(), *it);
+		write_single_family(out, os.str(), family);
       ++i;
     }
   }
@@ -293,10 +289,8 @@ protected:
 		  }
 		}
 	 }
-	 for (std::vector<size_t>::const_iterator it= order.begin();
-			it != order.end();
-			++it) {
-		const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& ind= ped.get_by_progr(*it);
+	 BOOST_FOREACH ( const size_t val, order ) {
+		const typename base_t::multifamily_pedigree_t::pedigree_t::individual_t& ind= ped.get_by_progr(val);
 		out << id_fam << _outsep;
 		out << ind.id() << _outsep;
 		if (ind.has_father()) {
@@ -320,12 +314,11 @@ protected:
   virtual void write_impl(std::ostream& out,
 								  const multifamily_pedigree_t& ped) const {
 	 size_t i= 0;
-	 for (multifamily_pedigree_t::type::const_iterator it= ped.families().begin();
-			it != ped.families().end();
-			++it) {
+	 BOOST_FOREACH( const multifamily_pedigree_t::pedigree_t& family,
+						 ped.families() ) {
 		std::ostringstream os;
 		os << i;
-		write_single_family(out, os.str(), *it);
+		write_single_family(out, os.str(), family);
 		++i;
 	 }
   }
