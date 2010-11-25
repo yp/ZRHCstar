@@ -306,7 +306,7 @@ protected:
 
 public:
 
-  basic_pedigree_t(const size_t len=0)
+  explicit basic_pedigree_t(const size_t len=0)
 		:_len(len), _individuals(this)
   {
 	 TRACE("Created an empty pedigree with genotype/haplotype length equal to " << _len);
