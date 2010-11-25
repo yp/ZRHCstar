@@ -207,6 +207,19 @@ public:
 
 };
 
+template <typename h_t, typename g_t>
+const h_t& homozygous_to_haplotype(const g_t& g) {
+  MY_ASSERT( (g == g_t::HOMO1) || (g == g_t::HOMO2) );
+  if        ( g == g_t::HOMO1 ) {
+	 return h_t::ALLELE1;
+  } else if ( g == g_t::HOMO2 ) {
+	 return h_t::ALLELE2;
+  } else {
+	 MY_FAIL;
+	 return h_t::MISS;
+  }
+};
+
 
 
 typedef single_biallelic_haplotype_t<> std_single_biallelic_haplotype_t;
