@@ -34,6 +34,7 @@
 
 #include "io-pedigree.hpp"
 #include "ped2cnf.hpp"
+#include "pedcnf2hc.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -120,72 +121,6 @@ private:
 	 INFO("SAT instance successfully saved to file '" << sat_file << "'.");
   };
 
-  void compute_ZRHC(pedigree_t& mped,
-						  const pedcnf_t& cnf) const {
-	 INFO("Computing the zero-recombinant haplotype configuration...");
-	 MY_ASSERT( mped.families().size() == 1 );
-	 family_t& ped= mped.families().front();
-// For each locus in each individual:
-//   (1) the locus is genotyped and it is homozygous (thus the haplotype
-//       is 'fixed'), or
-//   (2) there exists a H_i[j] variable in the SAT instance.
-	 BOOST_FOREACH( family_t::individual_t& ind,
-						 ped.individuals() ) {
-		TRACE("Considering individual " << ind.progr_id());
-		for (size_t locus= 0; locus < ped.genotype_length(); ++locus) {
-		  if ( ! is_genotyped(ind.g(locus)) ) {
-//        Individual not genotyped ->
-//          -> imputing genotype based on variables w_i_l and h_i_l
-			 TRACE("Individual " << ind.progr_id() << " at locus " << locus
-					 << " is not genotyped.");
-// FIXME: Some variables could not exist.
-			 bool hil= cnf.h(ind.progr_id(), locus);
-			 bool wil= cnf.w(ind.progr_id(), locus);
-				TRACE("hil " << hil << "   wil " << wil);
-			 if ( ! wil) {
-				DEBUG("Not-genotyped individual " << ind.progr_id() <<
-						" at locus " << locus << " is imputed as homozygous.");
-				if ( ! hil ) {
-				  ind.g(locus)= family_t::g::HOMO1;
-				} else {
-				  ind.g(locus)= family_t::g::HOMO2;
-				}
-			 } else {
-				DEBUG("Not-genotyped individual " << ind.progr_id() <<
-						" at locus " << locus << " is imputed as heterozygous.");
-				ind.g(locus)= family_t::g::HETER;
-			 }
-		  }
-		  if ( is_genotyped(ind.g(locus)) ) {
-			 if ( is_homozigous(ind.g(locus)) ) {
-//          Individual genotyped and homozygous ->
-//            -> haplotype is fixed and predetermined
-				TRACE("Individual " << ind.progr_id() << " at locus " << locus
-						<< " is genotyped and homozygous.");
-				ind.hp(locus)= ind.hm(locus)=
-				  homozygous_to_haplotype<family_t::h, family_t::g>(ind.g(locus));
-			 } else {
-//          Individual genotyped and heterozygous ->
-//            -> haplotype depends on variable h_i_l
-				MY_ASSERT( is_heterozygous(ind.g(locus)) );
-				TRACE("Individual " << ind.progr_id() << " at locus " << locus
-						<< " is genotyped and heterozygous.");
-				bool hil= cnf.h(ind.progr_id(), locus);
-				if ( ! hil) {
-				  ind.hp(locus)= family_t::h::ALLELE1;
-				  ind.hm(locus)= family_t::h::ALLELE2;
-				} else {
-				  ind.hp(locus)= family_t::h::ALLELE2;
-				  ind.hm(locus)= family_t::h::ALLELE1;
-				}
-			 }
-		  } else {
-			 MY_FAIL;
-		  }
-		}
-	 }
-	 INFO("Zero-recombinant haplotype configuration successfully computed.");
-  };
 
 
   void save_ZRHC(pedigree_t& ped,
@@ -234,7 +169,7 @@ private:
 		INFO("The pedigree can be realized by a zero-recombinant haplotype "
 			  "configuration.");
 // Compute the actual haplotype configuration
-		compute_ZRHC(ped, cnf);
+		compute_ZRHC_from_SAT(ped.families().front(), cnf);
 // Output the haplotype configuration
 		save_ZRHC(ped, hap_file);
 	 } else {
