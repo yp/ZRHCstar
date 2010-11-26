@@ -299,3 +299,216 @@ TEST(haplotype_genotype, conversion) {
   ASSERT_THROW({  proxy_function(genotype_t::base::MISS); },
 					assertion_failed_exception);
 }
+
+TEST(haplotype_genotype, consistency) {
+  typedef haplotype_t::base h_t;
+  typedef genotype_t::base g_t;
+
+  h_t h1, h2;
+  g_t g;
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::HOMO2 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::MISS  ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::MISS  ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::HOMO1 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::MISS  ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::MISS  ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::HOMO1 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::HOMO2 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::MISS  ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::HOMO1 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::MISS  ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::MISS  ) );
+
+  ASSERT_FALSE( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::HOMO1 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::MISS  ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::HOMO1 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::HETER ) );
+
+  ASSERT_TRUE ( haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::MISS  ) );
+
+}
+
+TEST(haplotype_genotype, strict_consistency) {
+  typedef haplotype_t::base h_t;
+  typedef genotype_t::base g_t;
+
+  h_t h1, h2;
+  g_t g;
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::HETER ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE1, g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::HETER ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::ALLELE2, g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::HETER ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE1, h_t::MISS,    g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::HOMO2 ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::HETER ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE1, g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::HOMO1 ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::HETER ) );
+
+  ASSERT_TRUE ( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::ALLELE2, g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::HETER ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::ALLELE2, h_t::MISS,    g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::HETER ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE1, g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::HETER ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::ALLELE2, g_t::MISS  ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::HOMO1 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::HOMO2 ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::HETER ) );
+
+  ASSERT_FALSE( strict_haplotype_genotype_consistent( h_t::MISS,    h_t::MISS,    g_t::MISS  ) );
+
+}
+
+
+TEST(haplotype_genotype, multilocus_consistency) {
+
+  haplotype_t h1(4);
+
+  h1[0]= haplotype_t::base::ALLELE1;
+  h1[1]= haplotype_t::base::ALLELE2;
+  h1[2]= haplotype_t::base::ALLELE1;
+  h1[3]= haplotype_t::base::ALLELE2;
+
+  haplotype_t h2(4);
+
+  h2[0]= haplotype_t::base::ALLELE2;
+  h2[1]= haplotype_t::base::ALLELE2;
+  h2[2]= haplotype_t::base::ALLELE1;
+  h2[3]= haplotype_t::base::ALLELE1;
+
+  genotype_t g(4);
+
+  g[0]= genotype_t::base::MISS;
+  g[1]= genotype_t::base::MISS;
+  g[2]= genotype_t::base::MISS;
+  g[3]= genotype_t::base::MISS;
+
+  ASSERT_TRUE( multilocus_haplotype_genotype_consistent(h1, h2, g) );
+
+  g[0]= genotype_t::base::MISS;
+  g[1]= genotype_t::base::HOMO2;
+  g[2]= genotype_t::base::HOMO1;
+  g[3]= genotype_t::base::HETER;
+
+  ASSERT_TRUE( multilocus_haplotype_genotype_consistent(h1, h2, g) );
+
+  g[0]= genotype_t::base::HETER;
+  g[1]= genotype_t::base::HOMO2;
+  g[2]= genotype_t::base::HOMO1;
+  g[3]= genotype_t::base::HETER;
+
+  ASSERT_TRUE( multilocus_haplotype_genotype_consistent(h1, h2, g) );
+
+  h1[0]= haplotype_t::base::MISS;
+
+  ASSERT_TRUE( multilocus_haplotype_genotype_consistent(h1, h2, g) );
+  ASSERT_FALSE( strict_multilocus_haplotype_genotype_consistent(h1, h2, g) );
+
+  h1[0]= haplotype_t::base::ALLELE2;
+
+  ASSERT_FALSE( multilocus_haplotype_genotype_consistent(h1, h2, g) );
+
+}
