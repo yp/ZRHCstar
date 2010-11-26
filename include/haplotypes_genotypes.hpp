@@ -409,5 +409,40 @@ multilocus_haplotype_genotype_consistent(const h_t& h1,
 typedef generic_fixlen_vector_t<std_single_biallelic_genotype_t> genotype_t;
 typedef generic_fixlen_vector_t<std_single_biallelic_haplotype_t> haplotype_t;
 
+template <class _base_t,
+			 class _reader,
+			 class _writer>
+bool operator==(const generic_fixlen_vector_t<_base_t,_reader,_writer>& v1,
+					 const generic_fixlen_vector_t<_base_t,_reader,_writer>& v2) {
+  typedef generic_fixlen_vector_t<_base_t,_reader,_writer> v_t;
+  if (v1.size() != v2.size())
+	 return false;
+  const typename v_t::base* v1it= v1.begin();
+  const typename v_t::base* v2it= v2.begin();
+  for (; v1it != v1.end(); ++v1it, ++v2it) {
+	 if ( (*v1it) != (*v2it) ) {
+		return false;
+	 }
+  }
+  return true;
+};
+
+template <class _base_t,
+			 class _reader,
+			 class _writer>
+bool operator!=(const generic_fixlen_vector_t<_base_t,_reader,_writer>& v1,
+					 const generic_fixlen_vector_t<_base_t,_reader,_writer>& v2) {
+  typedef generic_fixlen_vector_t<_base_t,_reader,_writer> v_t;
+  if (v1.size() != v2.size())
+	 return true;
+  const typename v_t::base* v1it= v1.begin();
+  const typename v_t::base* v2it= v2.begin();
+  for (; v1it != v1.end(); ++v1it, ++v2it) {
+	 if ( (*v1it) != (*v2it) ) {
+		return true;
+	 }
+  }
+  return false;
+};
 
 #endif // __HAPLOTYPES_GENOTYPES_HPP__

@@ -493,6 +493,43 @@ public:
 	 return consistent;
   };
 
+// Check if the haplotypes realize the genotypes
+  bool is_zero_recombinant() const {
+	 DEBUG("Checking if the haplotype configuration is zero-recombinant...");
+	 bool zr= true;
+	 BOOST_FOREACH( const individual_t& ind,
+						 individuals() ) {
+		TRACE("Checking individual " << ind.progr_id());
+		if (ind.has_father()) {
+		  TRACE(" --> father " << ind.father().progr_id());
+		  if (! ( (ind.hp() == ind.father().hp()) ||
+					 (ind.hp() == ind.father().hm()) ) ) {
+			 DEBUG("Individual " << ind.progr_id() <<
+					 " has not inherited his paternal haplotype from "
+					 " his father " << ind.father().progr_id());
+			 zr= false;
+			 break;
+		  }
+		}
+		if (ind.has_mother()) {
+		  TRACE(" --> mother " << ind.mother().progr_id());
+		  if (! ( (ind.hm() == ind.mother().hp()) ||
+					 (ind.hm() == ind.mother().hm()) ) ) {
+			 DEBUG("Individual " << ind.progr_id() <<
+					 " has not inherited his maternal haplotype from "
+					 " his mother " << ind.mother().progr_id());
+			 zr= false;
+			 break;
+		  }
+		}
+	 }
+	 if (zr) {
+		DEBUG("The haplotype configuration is zero-recombinant.");
+	 } else {
+		DEBUG("The haplotype configuration is NOT zero-recombinant.");
+	 }
+	 return zr;
+  }
 };
 
 
