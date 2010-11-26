@@ -201,3 +201,101 @@ TEST(haplotype, pair_writer) {
   }
 
 }
+
+TEST(haplotype, equality) {
+
+  haplotype_t h1(4);
+
+  h1[0]= haplotype_t::base::MISS;
+  h1[1]= haplotype_t::base::ALLELE2;
+  h1[2]= haplotype_t::base::ALLELE1;
+  h1[3]= haplotype_t::base::ALLELE2;
+
+  haplotype_t h2(4);
+
+  h2[0]= haplotype_t::base::MISS;
+  h2[1]= haplotype_t::base::ALLELE2;
+  h2[2]= haplotype_t::base::ALLELE1;
+  h2[3]= haplotype_t::base::ALLELE2;
+
+  ASSERT_EQ( h1, h2 );
+  ASSERT_TRUE( h1 == h2 );
+  ASSERT_FALSE( h1 != h2 );
+
+  h2[1]= haplotype_t::base::ALLELE1;
+
+  ASSERT_NE( h1, h2 );
+  ASSERT_FALSE( h1 == h2 );
+  ASSERT_TRUE( h1 != h2 );
+
+  haplotype_t h3(5);
+
+  h3[0]= haplotype_t::base::MISS;
+  h3[1]= haplotype_t::base::ALLELE2;
+  h3[2]= haplotype_t::base::ALLELE1;
+  h3[3]= haplotype_t::base::ALLELE2;
+  h3[4]= haplotype_t::base::ALLELE2;
+
+  ASSERT_NE( h1, h3 );
+  ASSERT_FALSE( h1 == h3 );
+  ASSERT_TRUE( h1 != h3 );
+}
+
+TEST(genotype, equality) {
+
+  genotype_t g1(4);
+
+  g1[0]= genotype_t::base::MISS;
+  g1[1]= genotype_t::base::HOMO2;
+  g1[2]= genotype_t::base::HOMO1;
+  g1[3]= genotype_t::base::HETER;
+
+  genotype_t g2(4);
+
+  g2[0]= genotype_t::base::MISS;
+  g2[1]= genotype_t::base::HOMO2;
+  g2[2]= genotype_t::base::HOMO1;
+  g2[3]= genotype_t::base::HETER;
+
+  ASSERT_EQ( g1, g2 );
+  ASSERT_TRUE( g1 == g2 );
+  ASSERT_FALSE( g1 != g2 );
+
+  g2[2]= genotype_t::base::HOMO1;
+
+  ASSERT_EQ( g1, g2 );
+  ASSERT_TRUE( g1 == g2 );
+  ASSERT_FALSE( g1 != g2 );
+
+  g2[1]= genotype_t::base::HOMO1;
+
+  ASSERT_NE( g1, g2 );
+  ASSERT_FALSE( g1 == g2 );
+  ASSERT_TRUE( g1 != g2 );
+
+  genotype_t g3(5);
+
+  g3[0]= genotype_t::base::MISS;
+  g3[1]= genotype_t::base::HOMO2;
+  g3[2]= genotype_t::base::HOMO1;
+  g3[3]= genotype_t::base::HETER;
+  g3[4]= genotype_t::base::HETER;
+
+  ASSERT_NE( g1, g3 );
+  ASSERT_FALSE( g1 == g3 );
+  ASSERT_TRUE( g1 != g3 );
+}
+
+const haplotype_t::base&
+proxy_function(const genotype_t::base& g) {
+  return homozygous_to_haplotype<haplotype_t::base, genotype_t::base>(g);
+}
+
+TEST(haplotype_genotype, conversion) {
+  ASSERT_EQ(haplotype_t::base::ALLELE1, proxy_function(genotype_t::base::HOMO1));
+  ASSERT_EQ(haplotype_t::base::ALLELE2, proxy_function(genotype_t::base::HOMO2));
+  ASSERT_THROW({  proxy_function(genotype_t::base::HETER); },
+					assertion_failed_exception);
+  ASSERT_THROW({  proxy_function(genotype_t::base::MISS); },
+					assertion_failed_exception);
+}
