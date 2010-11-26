@@ -173,6 +173,7 @@ private:
 		compute_ZRHC_from_SAT(family, cnf);
 // Check the haplotype configuration
 		const bool ok=
+		  family.is_completely_haplotyped() &&
 		  family.is_consistent() &&
 		  family.is_zero_recombinant();
 		if (ok) {

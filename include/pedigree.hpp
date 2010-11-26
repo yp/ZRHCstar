@@ -464,6 +464,33 @@ public:
 	 return _len;
   }
 
+  bool is_completely_haplotyped() const {
+	 DEBUG("Checking if the haplotype configuration is complete...");
+	 BOOST_FOREACH( const individual_t& ind,
+						 individuals() ) {
+		{
+		  const typename hap_t::base* it= ind.hp().begin();
+		  for (; it != ind.hp().end(); ++it) {
+			 if ( (*it) == hap_t::base::MISS ) {
+				DEBUG("The haplotype configuration is NOT complete.");
+				return false;
+			 }
+		  }
+		}
+		{
+		  const typename hap_t::base* it= ind.hm().begin();
+		  for (; it != ind.hm().end(); ++it) {
+			 if ( (*it) == hap_t::base::MISS ) {
+				DEBUG("The haplotype configuration is NOT complete.");
+				return false;
+			 }
+		  }
+		}
+	 }
+	 DEBUG("The haplotype configuration is complete.");
+	 return true;
+  };
+
 // Check if the haplotypes realize the genotypes
   bool is_consistent() const {
 	 DEBUG("Checking if the haplotype configuration is consistent with the observed genotypes...");
