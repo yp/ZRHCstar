@@ -221,6 +221,23 @@ const h_t& homozygous_to_haplotype(const g_t& g) {
 };
 
 
+template <typename h_t, typename g_t>
+bool
+haplotype_genotype_consistent(const h_t& h1, const h_t& h2,
+										const g_t& g) {
+  if (is_genotyped(g)) {
+	 if (is_homozigous(g)) {
+		return
+		  (h1 == h2) &&
+		  (h2 == homozygous_to_haplotype<h_t, g_t>(g));
+	 } else {
+		return h1 != h2;
+	 }
+  } else {
+	 return true;
+  }
+};
+
 
 typedef single_biallelic_haplotype_t<> std_single_biallelic_haplotype_t;
 
@@ -365,7 +382,29 @@ public:
 	 return in;
   }
 
+  size_t size() const {
+	 return _len;
+  };
+
 };
+
+template <typename h_t, typename g_t>
+bool
+multilocus_haplotype_genotype_consistent(const h_t& h1,
+													  const h_t& h2,
+													  const g_t& g) {
+  MY_ASSERT(g.size() == h1.size());
+  MY_ASSERT(g.size() == h2.size());
+  const typename g_t::base* git= g.begin();
+  const typename h_t::base* h1it= h1.begin();
+  const typename h_t::base* h2it= h2.begin();
+  for (; git != g.end(); ++git, ++h1it, ++h2it) {
+	 if (! haplotype_genotype_consistent(*h1it, *h2it, *git)) {
+		return false;
+	 }
+  }
+  return true;
+}
 
 typedef generic_fixlen_vector_t<std_single_biallelic_genotype_t> genotype_t;
 typedef generic_fixlen_vector_t<std_single_biallelic_haplotype_t> haplotype_t;

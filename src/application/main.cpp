@@ -168,8 +168,17 @@ private:
 	 if (is_sat) {
 		INFO("The pedigree can be realized by a zero-recombinant haplotype "
 			  "configuration.");
+		pedigree_t::pedigree_t& family= ped.families().front();
 // Compute the actual haplotype configuration
-		compute_ZRHC_from_SAT(ped.families().front(), cnf);
+		compute_ZRHC_from_SAT(family, cnf);
+// Check the haplotype configuration
+		const bool ok= family.is_consistent();
+		if (ok) {
+		  INFO("The computed haplotype configuration is valid.");
+		} else {
+		  ERROR("The computed haplotype configuration is not valid.");
+		  MY_FAIL;
+		}
 // Output the haplotype configuration
 		save_ZRHC(ped, hap_file);
 	 } else {

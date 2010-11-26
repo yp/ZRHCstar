@@ -44,6 +44,7 @@
 #include <climits>
 
 #include <boost/utility.hpp>
+#include <boost/foreach.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #include "log.hpp"
@@ -462,6 +463,35 @@ public:
   size_t genotype_length() const {
 	 return _len;
   }
+
+// Check if the haplotypes realize the genotypes
+  bool is_consistent() const {
+	 DEBUG("Checking if the haplotype configuration is consistent with the observed genotypes...");
+	 bool consistent= true;
+	 BOOST_FOREACH( const individual_t& ind,
+						 individuals() ) {
+		TRACE("Checking individual " << ind.progr_id());
+		consistent= consistent &&
+		  multilocus_haplotype_genotype_consistent( ind.hp(),
+																  ind.hm(),
+																  ind.g() );
+		if (!consistent) {
+		  DEBUG("Genotype of individual " << ind.progr_id()
+				  << " is not consistent with the"
+				  << " corresponding haplotypes."
+				  << " g=" << ind.g()
+				  << " hp=" << ind.hp()
+				  << " hm=" << ind.hm() );
+		  break;
+		}
+	 }
+	 if (consistent) {
+		DEBUG("The haplotype configuration is consistent with the observed genotypes.")
+	 } else {
+		DEBUG("The haplotype configuration is NOT consistent with the observed genotypes.")
+	 }
+	 return consistent;
+  };
 
 };
 
