@@ -225,19 +225,34 @@ template <typename h_t, typename g_t>
 bool
 haplotype_genotype_consistent(const h_t& h1, const h_t& h2,
 										const g_t& g) {
-  if (is_genotyped(g)) {
-	 if (is_homozigous(g)) {
-		return
-		  (h1 == h2) &&
-		  (h2 == homozygous_to_haplotype<h_t, g_t>(g));
-	 } else {
-		return h1 != h2;
-	 }
-  } else {
+  if ((h1 == h_t::MISS) && (h2 == h_t::MISS))
 	 return true;
+  if (! is_genotyped(g))
+	 return true;
+  if ((h1 == h_t::MISS) && (h2 != h_t::MISS))
+	 return haplotype_genotype_consistent(h2, h1, g);
+
+  MY_ASSERT( h1 != h_t::MISS );
+  MY_ASSERT( is_genotyped(g) );
+
+  if (is_homozigous(g)) {
+	 return
+		((h2 == h_t::MISS) || (h1 == h2)) &&
+		(h1 == homozygous_to_haplotype<h_t, g_t>(g));
+  } else {
+	 return (h2 == h_t::MISS) || (h1 != h2);
   }
 };
 
+template <typename h_t, typename g_t>
+bool
+strict_haplotype_genotype_consistent(const h_t& h1, const h_t& h2,
+												 const g_t& g) {
+  if ((h1 == h_t::MISS) || (h2 == h_t::MISS))
+	 return false;
+  else
+	 return haplotype_genotype_consistent(h1, h2, g);
+}
 
 typedef single_biallelic_haplotype_t<> std_single_biallelic_haplotype_t;
 
@@ -400,6 +415,24 @@ multilocus_haplotype_genotype_consistent(const h_t& h1,
   const typename h_t::base* h2it= h2.begin();
   for (; git != g.end(); ++git, ++h1it, ++h2it) {
 	 if (! haplotype_genotype_consistent(*h1it, *h2it, *git)) {
+		return false;
+	 }
+  }
+  return true;
+}
+
+template <typename h_t, typename g_t>
+bool
+strict_multilocus_haplotype_genotype_consistent(const h_t& h1,
+																const h_t& h2,
+																const g_t& g) {
+  MY_ASSERT(g.size() == h1.size());
+  MY_ASSERT(g.size() == h2.size());
+  const typename g_t::base* git= g.begin();
+  const typename h_t::base* h1it= h1.begin();
+  const typename h_t::base* h2it= h2.begin();
+  for (; git != g.end(); ++git, ++h1it, ++h2it) {
+	 if (! strict_haplotype_genotype_consistent(*h1it, *h2it, *git)) {
 		return false;
 	 }
   }
