@@ -45,10 +45,12 @@ class zrhcstar_t:
   public log_able_t<zrhcstar_t>
 {
 
-private:
+public:
 
   typedef plink_reader_t<>::multifamily_pedigree_t pedigree_t;
   typedef pedigree_t::pedigree_t family_t;
+
+private:
 
   void prepare_pedigree_and_sat(std::istream& ped_is,
 										  pedigree_t& mped,
@@ -74,6 +76,8 @@ private:
 
 
 
+public:
+
   void save_ZRHC(pedigree_t& ped,
 					  std::ostream& hap_os) const {
 	 L_INFO("Saving haplotype configuration...");
@@ -93,8 +97,6 @@ private:
   };
 
 
-public:
-
   void create_SAT_instance_from_pedigree(std::istream& ped_is,
 													  std::ostream& sat_os,
 													  const std::vector<std::string>& headers) const {
@@ -111,9 +113,8 @@ public:
 
   bool compute_HC_from_SAT_results(std::istream& ped_is,
 											  std::istream& res_is,
-											  std::ostream& hap_os) const {
-	 pedigree_t ped;
-	 pedcnf_t cnf;
+											  pedigree_t& ped,
+											  pedcnf_t& cnf) const {
 	 prepare_pedigree_and_sat(ped_is, ped, cnf);
 
 // Open the result file and read the assignment
@@ -136,12 +137,25 @@ public:
 		  L_ERROR("The computed haplotype configuration is not valid.");
 		  MY_FAIL;
 		}
-// Output the haplotype configuration
-		save_ZRHC(ped, hap_os);
 	 } else {
 		L_INFO("The pedigree CANNOT be realized by a zero-recombinant haplotype "
 			  "configuration.");
 // Do nothing
+	 }
+	 return is_sat;
+  };
+
+  bool compute_HC_from_SAT_results(std::istream& ped_is,
+											  std::istream& res_is,
+											  std::ostream& hap_os) const {
+	 pedigree_t ped;
+	 pedcnf_t cnf;
+	 const bool is_sat=
+		compute_HC_from_SAT_results(ped_is, res_is,
+											 ped, cnf);
+	 if (is_sat) {
+// Output the haplotype configuration
+		save_ZRHC(ped, hap_os);
 	 }
 	 return is_sat;
   }
