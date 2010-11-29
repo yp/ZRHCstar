@@ -529,10 +529,10 @@ public:
 		TRACE("Checking individual " << ind.progr_id());
 		if (ind.has_father()) {
 		  TRACE(" --> father " << ind.father().progr_id());
-		  if (! ( (ind.hp() == ind.father().hp()) ||
-					 (ind.hp() == ind.father().hm()) ) ) {
+		  if (! ( ind.hp().is_compatible_with(ind.father().hp()) ||
+					 ind.hp().is_compatible_with(ind.father().hm()) ) ) {
 			 DEBUG("Individual " << ind.progr_id() <<
-					 " has not inherited his paternal haplotype from "
+					 " has not inherited his paternal haplotype from"
 					 " his father " << ind.father().progr_id());
 			 zr= false;
 			 break;
@@ -540,10 +540,10 @@ public:
 		}
 		if (ind.has_mother()) {
 		  TRACE(" --> mother " << ind.mother().progr_id());
-		  if (! ( (ind.hm() == ind.mother().hp()) ||
-					 (ind.hm() == ind.mother().hm()) ) ) {
+		  if (! ( ind.hm().is_compatible_with(ind.mother().hp()) ||
+					 ind.hm().is_compatible_with(ind.mother().hm()) ) ) {
 			 DEBUG("Individual " << ind.progr_id() <<
-					 " has not inherited his maternal haplotype from "
+					 " has not inherited his maternal haplotype from"
 					 " his mother " << ind.mother().progr_id());
 			 zr= false;
 			 break;

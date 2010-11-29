@@ -401,6 +401,22 @@ public:
 	 return _len;
   };
 
+  bool is_compatible_with(const generic_fixlen_vector_t<_base_t,_reader,_writer>& v) const {
+  typedef generic_fixlen_vector_t<_base_t,_reader,_writer> v_t;
+  if (size() != v.size())
+	 return false;
+  const typename v_t::base* v1it= begin();
+  const typename v_t::base* v2it= v.begin();
+  for (; v1it != end(); ++v1it, ++v2it) {
+	 if ( (*v1it != v_t::base::MISS) &&
+			(*v2it != v_t::base::MISS) &&
+			(*v1it != *v2it) ) {
+		return false;
+	 }
+  }
+  return true;
+};
+
 };
 
 template <typename h_t, typename g_t>
