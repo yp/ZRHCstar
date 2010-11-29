@@ -37,7 +37,6 @@
 #include "pedcnf2hc.hpp"
 
 #include <iostream>
-#include <fstream>
 
 using namespace std;
 
@@ -51,31 +50,20 @@ private:
   typedef plink_reader_t<>::multifamily_pedigree_t pedigree_t;
   typedef pedigree_t::pedigree_t family_t;
 
-  void prepare_pedigree_and_sat(const string& ped_file,
+  void prepare_pedigree_and_sat(std::istream& ped_is,
 										  pedigree_t& mped,
 										  pedcnf_t& cnf) const {
-// Open the file and read the pedigree
-	 ifstream is(ped_file);
-	 if (!is.is_open()) {
-		L_ERROR("Impossible to open pedigree file '" << ped_file << "'.");
-		throw logic_error(string("Impossible to open pedigree file '")
-								+ ped_file + "'.");
-	 }
-
-	 L_INFO("Reading pedigree from file '" << ped_file << "'...");
+	 L_INFO("Reading pedigree...");
 	 biallelic_genotype_reader_t<> gr;
 	 plink_reader_t<> reader(gr);
-	 reader.read(is, mped);
-	 is.close();
-	 L_INFO("Pedigree successfully read from file '" << ped_file << "'.");
+	 reader.read(ped_is, mped);
+	 L_INFO("Pedigree successfully read.");
 
 	 if (mped.families().empty()) {
-		throw logic_error(string("No family has been read from file '")
-								+ ped_file + "'.");
+		throw std::logic_error(std::string("No family has been read."));
 	 }
 	 if (mped.families().size() > 1) {
-		throw logic_error(string("The pedigree read from file '")
-								+ ped_file + "' has more than one family.");
+		throw std::logic_error(std::string("The pedigree has more than one family."));
 	 }
 
 // Prepare the SAT instance
@@ -87,76 +75,49 @@ private:
 
 
   void save_ZRHC(pedigree_t& ped,
-					  const string& hap_file) const {
-	 L_INFO("Saving haplotype configuration to file '" << hap_file << "'...");
+					  std::ostream& hap_os) const {
+	 L_INFO("Saving haplotype configuration...");
 // FIXME: Improve template instantiation
 	 biallelic_haplotype_pair_writer_t<> hpw;
 	 plink_haplotype_writer_t<> writer(hpw, "\t", "|");
-	 ofstream os(hap_file);
-	 if (!os.is_open()) {
-		L_ERROR("Impossible to open haplotype result file '" << hap_file << "'.");
-		throw logic_error(string("Impossible to open haplotype result file '")
-								+ hap_file + "'.");
-	 }
-	 writer.write(os, ped);
-	 os.close();
+	 writer.write(hap_os, ped);
 	 L_INFO("Haplotype configuration successfully saved.");
   };
 
   bool read_SAT_results(pedcnf_t& cnf,
-								const string& result_file) const {
-	 L_INFO("Reading SAT results from file '" << result_file << "'...");
-	 ifstream is(result_file);
-	 if (!is.is_open()) {
-		L_ERROR("Impossible to open SAT result file '" << result_file << "'.");
-		throw logic_error(string("Impossible to open SAT result file '")
-								+ result_file + "'.");
-	 }
-	 const bool is_sat= cnf.assignment_from_minisat_format(is);
-	 is.close();
-	 L_INFO("SAT results successfully read from file '" << result_file << "'.");
+								std::istream& res_is) const {
+	 L_INFO("Reading SAT results...");
+	 const bool is_sat= cnf.assignment_from_minisat_format(res_is);
+	 L_INFO("SAT results successfully read.");
 	 return is_sat;
   };
 
 
 public:
 
-  void create_SAT_instance_from_pedigree(const string& ped_file,
-													  const string& sat_file) const {
+  void create_SAT_instance_from_pedigree(std::istream& ped_is,
+													  std::ostream& sat_os,
+													  const std::vector<std::string>& headers) const {
 	 pedigree_t ped;
 	 pedcnf_t cnf;
-	 prepare_pedigree_and_sat(ped_file, ped, cnf);
+	 prepare_pedigree_and_sat(ped_is, ped, cnf);
 // Output the instance
-	 L_INFO("Saving SAT instance to file '" << sat_file << "'...");
-	 ofstream out(sat_file);
-	 if (!out.is_open()) {
-		L_ERROR("Impossible to open file '" << sat_file
-				<< "' for writing SAT instance.");
-		throw logic_error(string("Impossible to open file '") + sat_file
-								+ "' for writing SAT instance.");
-	 }
-	 const string headers[] = {
-		"SAT instance",
-		string("pedigree: ") + ped_file,
-		string("sat: ") + sat_file,
-		string("source version: ") + APPLICATION_SOURCE_VERSION
-	 };
-	 cnf.clauses_to_dimacs_format(out, vector<string>(headers, headers+4));
-	 out.close();
-	 L_INFO("SAT instance successfully saved to file '" << sat_file << "'.");
+	 L_INFO("Saving SAT instance...");
+	 cnf.clauses_to_dimacs_format(sat_os, headers);
+	 L_INFO("SAT instance successfully saved.");
   };
 
 
 
-  bool compute_HC_from_SAT_results(const string& ped_file,
-											  const string& result_file,
-											  const string& hap_file) const {
+  bool compute_HC_from_SAT_results(std::istream& ped_is,
+											  std::istream& res_is,
+											  std::ostream& hap_os) const {
 	 pedigree_t ped;
 	 pedcnf_t cnf;
-	 prepare_pedigree_and_sat(ped_file, ped, cnf);
+	 prepare_pedigree_and_sat(ped_is, ped, cnf);
 
 // Open the result file and read the assignment
-	 const bool is_sat= read_SAT_results(cnf, result_file);
+	 const bool is_sat= read_SAT_results(cnf, res_is);
 
 	 if (is_sat) {
 		L_INFO("The pedigree can be realized by a zero-recombinant haplotype "
@@ -176,7 +137,7 @@ public:
 		  MY_FAIL;
 		}
 // Output the haplotype configuration
-		save_ZRHC(ped, hap_file);
+		save_ZRHC(ped, hap_os);
 	 } else {
 		L_INFO("The pedigree CANNOT be realized by a zero-recombinant haplotype "
 			  "configuration.");

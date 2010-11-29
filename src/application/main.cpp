@@ -55,6 +55,32 @@ public:
 		:application_t(APPLICATION_CODENAME " " APPLICATION_VERSION_STRING)
   {}
 
+private:
+
+  ifstream& get_ifstream(const string& file_name, ifstream& is) const {
+	 DEBUG("Opening file '" << file_name << "' for reading...");
+	 is.open(file_name);
+	 if (!is.is_open()) {
+		ERROR("Impossible to open file '" << file_name << "' for reading.");
+		throw logic_error(string("Impossible to open file '")
+								+ file_name + "' for reading.");
+	 }
+	 DEBUG("File '" << file_name << "' successfully opened.");
+	 return is;
+  };
+
+  ofstream& get_ofstream(const string& file_name, ofstream& os) const {
+	 DEBUG("Opening file '" << file_name << "' for writing...");
+	 os.open(file_name);
+	 if (!os.is_open()) {
+		ERROR("Impossible to open file '" << file_name << "' for writing.");
+		throw logic_error(string("Impossible to open file '")
+								+ file_name + "' for writing.");
+	 }
+	 DEBUG("File '" << file_name << "' successfully opened.");
+	 return os;
+  };
+
 protected:
 
   virtual po::options_description
@@ -116,10 +142,27 @@ protected:
 		INFO("Creation of the SAT instance from the pedigree of file '"
 			  << vm["pedigree"].as<string>() << "'...");
 
-		zrhcstar.create_SAT_instance_from_pedigree(vm["pedigree"].as<string>(),
-																 vm["sat"].as<string>());
+		ifstream ped_is;
+		get_ifstream(vm["pedigree"].as<string>(), ped_is);
+		ofstream sat_os;
+		get_ofstream(vm["sat"].as<string>(), sat_os);
+		const std::string headers[] = {
+		  "SAT instance",
+		  std::string("pedigree: ") + vm["pedigree"].as<string>(),
+		  std::string("sat: ") + vm["sat"].as<string>(),
+		  std::string("source version: ") + APPLICATION_SOURCE_VERSION
+		};
+		zrhcstar.create_SAT_instance_from_pedigree(ped_is,
+																 sat_os,
+																 vector<string>(headers,
+																					 headers+4));
+		ped_is.close();
+		sat_os.close();
+
 		INFO("SAT instance successfully created and saved.");
+
 		main_ris= EXIT_SUCCESS;
+
 	 } else if (vm["read"].as<bool>()) {
 //    Computation of the haplotype configuration
 		INFO("Computation of the haplotype configuration from the "
@@ -127,10 +170,17 @@ protected:
 			  << vm["pedigree"].as<string>()
 			  << "' and the results of the SAT solver stored in file '"
 			  << vm["result"].as<string>() << "'...");
+		ifstream ped_is;
+		get_ifstream(vm["pedigree"].as<string>(), ped_is);
+		ifstream res_is;
+		get_ifstream(vm["result"].as<string>(), res_is);
+		ofstream hap_os;
+		get_ofstream(vm["haplotypes"].as<string>(), hap_os);
 		bool is_zrhc=
-		  zrhcstar.compute_HC_from_SAT_results(vm["pedigree"].as<string>(),
-															vm["result"].as<string>(),
-															vm["haplotypes"].as<string>());
+		  zrhcstar.compute_HC_from_SAT_results(ped_is, res_is, hap_os);
+		ped_is.close();
+		res_is.close();
+		hap_os.close();
 		if (is_zrhc) {
 		  INFO("Zero-Recombinant Haplotype Configuration successfully "
 				 "computed and saved.");
