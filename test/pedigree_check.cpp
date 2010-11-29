@@ -341,3 +341,85 @@ TEST(pedigree, phenotype) {
   ASSERT_EQ("100", ind1.phenotype());
   ASSERT_EQ("-1", ind2.phenotype());
 }
+
+TEST(pedigree, consistency) {
+  pedigree_t ped(4);
+
+  pedigree_t::individual_t& ind0= ped.get_by_id_or_create(100);
+  pedigree_t::individual_t& ind1= ped.get_by_id_or_create(101);
+  pedigree_t::individual_t& ind2= ped.get_by_id_or_create(102);
+
+  ind0.phenotype()= "phenotype";
+  ind1.phenotype()= "phenotype";
+  ind2.phenotype()= "phenotype";
+
+  ped.add_trio_by_progr(0, 1, 2);
+
+  ind0.g(0)= pedigree_t::g::HETER;
+  ind0.g(1)= pedigree_t::g::HETER;
+  ind0.g(2)= pedigree_t::g::HETER;
+  ind0.g(3)= pedigree_t::g::MISS;
+
+  ind0.hp(0)= pedigree_t::h::ALLELE1;  ind0.hm(0)= pedigree_t::h::ALLELE2;
+  ind0.hp(1)= pedigree_t::h::ALLELE2;  ind0.hm(1)= pedigree_t::h::ALLELE1;
+  ind0.hp(2)= pedigree_t::h::MISS;     ind0.hm(2)= pedigree_t::h::ALLELE1;
+  ind0.hp(3)= pedigree_t::h::ALLELE1;  ind0.hm(3)= pedigree_t::h::ALLELE1;
+
+  ind1.g(0)= pedigree_t::g::HOMO1;
+  ind1.g(1)= pedigree_t::g::HOMO2;
+  ind1.g(2)= pedigree_t::g::MISS;
+  ind1.g(3)= pedigree_t::g::HOMO1;
+
+  ind1.hp(0)= pedigree_t::h::ALLELE1;  ind1.hm(0)= pedigree_t::h::ALLELE1;
+  ind1.hp(1)= pedigree_t::h::ALLELE2;  ind1.hm(1)= pedigree_t::h::ALLELE2;
+  ind1.hp(2)= pedigree_t::h::ALLELE1;  ind1.hm(2)= pedigree_t::h::ALLELE1;
+  ind1.hp(3)= pedigree_t::h::ALLELE1;  ind1.hm(3)= pedigree_t::h::ALLELE1;
+
+  ind2.g(0)= pedigree_t::g::HOMO2;
+  ind2.g(1)= pedigree_t::g::HOMO1;
+  ind2.g(2)= pedigree_t::g::HETER;
+  ind2.g(3)= pedigree_t::g::HOMO2;
+
+  ind2.hp(0)= pedigree_t::h::ALLELE2;  ind2.hm(0)= pedigree_t::h::ALLELE2;
+  ind2.hp(1)= pedigree_t::h::ALLELE1;  ind2.hm(1)= pedigree_t::h::ALLELE1;
+  ind2.hp(2)= pedigree_t::h::MISS;     ind2.hm(2)= pedigree_t::h::ALLELE1;
+  ind2.hp(3)= pedigree_t::h::ALLELE2;  ind2.hm(3)= pedigree_t::h::ALLELE2;
+
+  ASSERT_FALSE( ped.is_completely_haplotyped() );
+  ASSERT_TRUE ( ped.is_consistent() );
+  ASSERT_FALSE( ped.is_zero_recombinant() );
+
+  ind0.hm(3)= pedigree_t::h::ALLELE2;
+
+  ASSERT_FALSE( ped.is_completely_haplotyped() );
+  ASSERT_TRUE ( ped.is_consistent() );
+  ASSERT_TRUE ( ped.is_zero_recombinant() );
+
+  ind0.g(3)= pedigree_t::g::HOMO2;
+
+  ASSERT_FALSE( ped.is_completely_haplotyped() );
+  ASSERT_FALSE( ped.is_consistent() );
+  ASSERT_TRUE ( ped.is_zero_recombinant() );
+
+  ind0.hm(3)= pedigree_t::h::ALLELE1;
+
+  ASSERT_FALSE( ped.is_completely_haplotyped() );
+  ASSERT_FALSE( ped.is_consistent() );
+  ASSERT_FALSE( ped.is_zero_recombinant() );
+
+  ind0.g(3)= pedigree_t::g::HOMO2;
+  ind0.hp(2)= pedigree_t::h::ALLELE2;
+  ind0.hp(3)= pedigree_t::h::ALLELE2;
+  ind0.hm(3)= pedigree_t::h::ALLELE2;
+
+  ind1.g(3)= pedigree_t::g::HETER;
+  ind1.hm(2)= pedigree_t::h::ALLELE2;
+  ind1.hm(3)= pedigree_t::h::ALLELE2;
+
+  ind2.hp(2)= pedigree_t::h::ALLELE2;
+
+  ASSERT_TRUE ( ped.is_completely_haplotyped() );
+  ASSERT_TRUE ( ped.is_consistent() );
+  ASSERT_TRUE ( ped.is_zero_recombinant() );
+
+}
