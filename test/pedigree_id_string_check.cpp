@@ -52,8 +52,10 @@ TEST(pedigree_str, access_hm) {
   test_pedigree_t ped(4);
 
   test_pedigree_t::individual_t& ind0= ped.add_individual();
-  test_pedigree_t::individual_t& ind1= ped.add_individual();
-  test_pedigree_t::individual_t& ind2= ped.add_individual();
+// test_pedigree_t::individual_t& ind1=
+  ped.add_individual();
+// test_pedigree_t::individual_t& ind2=
+  ped.add_individual();
 
   ind0.hm(0)= test_pedigree_t::h::ALLELE1;
   ind0.hm(1)= test_pedigree_t::h::ALLELE2;
@@ -87,8 +89,10 @@ TEST(pedigree_str, access_hp) {
   test_pedigree_t ped(4);
 
   test_pedigree_t::individual_t& ind0= ped.add_individual();
-  test_pedigree_t::individual_t& ind1= ped.add_individual();
-  test_pedigree_t::individual_t& ind2= ped.add_individual();
+// test_pedigree_t::individual_t& ind1=
+  ped.add_individual();
+// test_pedigree_t::individual_t& ind2=
+  ped.add_individual();
 
   ind0.hp(0)= test_pedigree_t::h::ALLELE1;
   ind0.hp(1)= test_pedigree_t::h::ALLELE2;
@@ -122,8 +126,10 @@ TEST(pedigree_str, access_g) {
   test_pedigree_t ped(4);
 
   test_pedigree_t::individual_t& ind0= ped.add_individual();
-  test_pedigree_t::individual_t& ind1= ped.add_individual();
-  test_pedigree_t::individual_t& ind2= ped.add_individual();
+// test_pedigree_t::individual_t& ind1=
+  ped.add_individual();
+// test_pedigree_t::individual_t& ind2=
+  ped.add_individual();
 
   ind0.g(0)= test_pedigree_t::g::HETER;
   ind0.g(1)= test_pedigree_t::g::HOMO1;

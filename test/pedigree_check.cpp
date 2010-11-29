@@ -39,8 +39,10 @@ TEST(pedigree, access_hm) {
   pedigree_t ped(4);
 
   pedigree_t::individual_t& ind0= ped.add_individual();
-  pedigree_t::individual_t& ind1= ped.add_individual();
-  pedigree_t::individual_t& ind2= ped.add_individual();
+// pedigree_t::individual_t& ind1=
+  ped.add_individual();
+// pedigree_t::individual_t& ind2=
+  ped.add_individual();
 
   ind0.hm(0)= pedigree_t::h::ALLELE1;
   ind0.hm(1)= pedigree_t::h::ALLELE2;
@@ -74,8 +76,10 @@ TEST(pedigree, access_hp) {
   pedigree_t ped(4);
 
   pedigree_t::individual_t& ind0= ped.add_individual();
-  pedigree_t::individual_t& ind1= ped.add_individual();
-  pedigree_t::individual_t& ind2= ped.add_individual();
+// pedigree_t::individual_t& ind1=
+  ped.add_individual();
+// pedigree_t::individual_t& ind2=
+  ped.add_individual();
 
   ind0.hp(0)= pedigree_t::h::ALLELE1;
   ind0.hp(1)= pedigree_t::h::ALLELE2;
@@ -109,8 +113,10 @@ TEST(pedigree, access_g) {
   pedigree_t ped(4);
 
   pedigree_t::individual_t& ind0= ped.add_individual();
-  pedigree_t::individual_t& ind1= ped.add_individual();
-  pedigree_t::individual_t& ind2= ped.add_individual();
+// pedigree_t::individual_t& ind1=
+  ped.add_individual();
+// pedigree_t::individual_t& ind2=
+  ped.add_individual();
 
   ind0.g(0)= pedigree_t::g::HETER;
   ind0.g(1)= pedigree_t::g::HOMO1;
