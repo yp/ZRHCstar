@@ -49,8 +49,8 @@ find_package (Log4Cxx REQUIRED)
 include_directories(${Log4Cxx_INCLUDE_DIRS})
 link_directories(${Log4Cxx_LIBRARY_DIRS})
 
-set (CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
-set (CMAKE_CXX_FLAGS_DEBUG "-O0 -Wall ${CMAKE_CXX_FLAGS_DEBUG}")
+add_definitions("-std=c++0x -Wall")
+set (CMAKE_CXX_FLAGS_DEBUG "-O0 ${CMAKE_CXX_FLAGS_DEBUG}")
 
 include(ExtractSourceVersionFromGit)
 set (APPLICATION_VERSION_STRING "${APPLICATION_SOURCE_VERSION}") # See the version from the 'git' repositories

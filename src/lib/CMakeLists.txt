@@ -15,3 +15,7 @@ add_library(${project_base_LIB} STATIC
 )
 
 
+set_target_properties(${project_base_LIB}
+  PROPERTIES
+  COMPILE_DEFINITIONS_RELEASE NO_DBG_ASSERTIONS
+)

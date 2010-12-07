@@ -48,7 +48,7 @@ print_boost_any(std::ostream& out, const boost::any& i) {
 
 std::ostream&
 operator<< (std::ostream& out, const tree_node& node) {
-  MY_ASSERT( ( !node.data.empty() ) || node.children.empty() );
+  MY_ASSERT_DBG( ( !node.data.empty() ) || node.children.empty() );
   if (!node.data.empty()) {
 	 if (node.children.empty()) {
 		print_boost_any(out, node.data);

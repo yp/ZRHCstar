@@ -96,7 +96,18 @@ public:
 
 #define DESCRIBE __FILE__ ":" BOOST_PP_STRINGIZE(__LINE__)
 
-#define MY_ASSERT( cond ) asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " DESCRIBE)
+#ifdef NO_DBG_ASSERTIONS
+
+#define MY_ASSERT_DBG( cond ) while (false) {}
+
+#else // not defined NO_DBG_ASSERTIONS
+
+#define MY_ASSERT_DBG( cond ) MY_ASSERT( cond )
+
+#endif // NO_DBG_ASSERTIONS
+
+#define MY_ASSERT( cond ) if (!(bool)(cond)) { asserter_t::get_asserter().assert_msg( (cond), "Assertion " BOOST_PP_STRINGIZE( cond ) " failed at file " DESCRIBE); }
+
 
 #define MY_FAIL asserter_t::get_asserter().assert_msg( (false), "Unexpected control-flow at file " DESCRIBE)
 

@@ -269,14 +269,14 @@ public:
 	 T it1= begin1;
 	 T it2= begin2;
 	 for(; it1 != end1; ++it1, ++it2) {
-		MY_ASSERT( it2 != end2 );
+		MY_ASSERT_DBG( it2 != end2 );
 		if (it1 != begin1) {
-		  MY_ASSERT( it2 != begin2 );
+		  MY_ASSERT_DBG( it2 != begin2 );
 		  vector_stream << outsep;
 		}
 		encode_next(vector_stream, *it1, *it2, insep);
 	 }
-	 MY_ASSERT( (it1 == end1) && (it2 == end2) );
+	 MY_ASSERT_DBG( (it1 == end1) && (it2 == end2) );
   }
 
   template <typename T>

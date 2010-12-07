@@ -61,7 +61,7 @@ pedcnf_t::get_var(varmap_t& map,
 	 _vars.push_back(boost::make_tuple(var_kind, i1, i2));
 	 _vals.push_back(false);
 	 std::pair< varmap_t::iterator, bool> ret= map.insert(std::make_pair(boost::make_tuple(i1, i2), _vars.size()));
-	 MY_ASSERT(ret.second);
+	 MY_ASSERT_DBG(ret.second);
 	 it= ret.first;
   }
   return it->second;
@@ -82,7 +82,7 @@ bool
 pedcnf_t::get_val(const varmap_t& map,
 						const size_t i1, const size_t i2) const {
   int var= get_var(map, i1, i2);
-  MY_ASSERT( (0 < var) && ((size_t)var <= _vals.size()) );
+  MY_ASSERT_DBG( (0 < var) && ((size_t)var <= _vals.size()) );
   return _vals[var-1];
 };
 
@@ -129,7 +129,7 @@ pedcnf_t::get_dummy(const int v1, const int v2) const {
 bool
 pedcnf_t::is_satisfying_assignment() const {
   L_DEBUG("Checking if value assignment satisfies the clauses...");
-  MY_ASSERT( _vars.size() == _vals.size() );
+  MY_ASSERT_DBG( _vars.size() == _vals.size() );
   bool ris= true;
   BOOST_FOREACH(const clause_t& clause, _clauses) {
 	 if (ris) {
@@ -201,7 +201,7 @@ pedcnf_t::assignment_from_minisat_format(std::istream& in) {
   std::string line;
   std::getline(in, line);
   boost::trim(line);
-  MY_ASSERT( (line == "SAT") || (line == "UNSAT") );
+  MY_ASSERT_DBG( (line == "SAT") || (line == "UNSAT") );
   if (line == "UNSAT") {
 	 L_DEBUG("UNSATISFIABLE clauses.");
 	 return false;
@@ -216,7 +216,7 @@ pedcnf_t::assignment_from_minisat_format(std::istream& in) {
 		_vals[(size_t)abs(value)-1]= (value>0);
 	 }
 	 MY_ASSERT( ! (is >> value) ); // zero must be the last element
-	 MY_ASSERT( is_satisfying_assignment() );
+	 MY_ASSERT_DBG( is_satisfying_assignment() );
 	 return true;
   } else {
 	 MY_FAIL;

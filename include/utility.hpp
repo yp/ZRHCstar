@@ -137,7 +137,7 @@ protected:
   enum_like_t(const size_t d)
 		:_d(d)
   {
-	 MY_ASSERT((0 <= d) && (d<n_values));
+	 MY_ASSERT_DBG((0 <= d) && (d<n_values));
   }
 
   size_t get_ordinal_data() const {
@@ -149,7 +149,7 @@ public:
   enum_like_t(const derived_enum& copy)
 		: _d(copy.get_ordinal_data())
   {
-	 MY_ASSERT( copy.get_ordinal_data() <n_values );
+	 MY_ASSERT_DBG( copy.get_ordinal_data() <n_values );
   };
 
   const derived_enum&

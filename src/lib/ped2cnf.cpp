@@ -81,8 +81,8 @@ static void
 get_basic_clause(pedcnf_t& cnf,
 					  const tree_node& n,
 					  std::vector<int>& v) {
-  MY_ASSERT( boost::any_cast<std::string>(&n.data) );
-  MY_ASSERT( boost::any_cast<std::string>(n.data) == "xor" );
+  MY_ASSERT_DBG( boost::any_cast<std::string>(&n.data) );
+  MY_ASSERT_DBG( boost::any_cast<std::string>(n.data) == "xor" );
   v.clear();
   v.reserve(n.children.size());
   for (std::list<tree_node>::const_iterator it= n.children.begin();
@@ -90,10 +90,10 @@ get_basic_clause(pedcnf_t& cnf,
 		 ++it) {
 	 const tree_node& child= *it;
 	 if (boost::any_cast<std::string>(&child.data)) {
-		MY_ASSERT( boost::any_cast<std::string>(child.data) == "and" );
-		MY_ASSERT( child.children.size() == 2 );
-		MY_ASSERT( boost::any_cast<int>(&child.children.front().data) );
-		MY_ASSERT( boost::any_cast<int>(&child.children.back().data) );
+		MY_ASSERT_DBG( boost::any_cast<std::string>(child.data) == "and" );
+		MY_ASSERT_DBG( child.children.size() == 2 );
+		MY_ASSERT_DBG( boost::any_cast<int>(&child.children.front().data) );
+		MY_ASSERT_DBG( boost::any_cast<int>(&child.children.back().data) );
 		int var1= boost::any_cast<int>(child.children.front().data);
 		int var2= boost::any_cast<int>(child.children.back().data);
 		int dummy= cnf.get_dummy(var1, var2);
@@ -101,7 +101,7 @@ get_basic_clause(pedcnf_t& cnf,
 		v.push_back(dummy);
 	 } else if (boost::any_cast<int>(&child.data)) {
 		int var= boost::any_cast<int>(child.data);
-		MY_ASSERT( var>=0 );
+		MY_ASSERT_DBG( var>=0 );
 		v.push_back(var);
 	 }
   }
@@ -110,10 +110,10 @@ get_basic_clause(pedcnf_t& cnf,
 static void
 not2cnf(const tree_node& constraint,
 		  pedcnf_t& cnf) {
-  MY_ASSERT( constraint.children.size()==1 );
+  MY_ASSERT_DBG( constraint.children.size()==1 );
   const tree_node& child= constraint.children.front();
   if (boost::any_cast<std::string>(&child.data)) {
-	 MY_ASSERT( boost::any_cast<std::string>(child.data) == "xor" );
+	 MY_ASSERT_DBG( boost::any_cast<std::string>(child.data) == "xor" );
 	 std::vector<int> basic_clause;
 	 get_basic_clause(cnf, child, basic_clause);
 	 for (size_t n= 1; n<=basic_clause.size(); n+= 2) {
@@ -121,7 +121,7 @@ not2cnf(const tree_node& constraint,
 	 }
   } else if (boost::any_cast<int>(&child.data)) {
 	 int var= boost::any_cast<int>(child.data);
-	 MY_ASSERT( var>=0 );
+	 MY_ASSERT_DBG( var>=0 );
 	 pedcnf_t::clause_t clause;
 	 clause.insert(-var);
 	 cnf.add_clause(clause);
@@ -133,9 +133,9 @@ not2cnf(const tree_node& constraint,
 static void
 xor2cnf(const tree_node& constraint,
 		  pedcnf_t& cnf) {
-  MY_ASSERT( constraint.children.size()>1 );
-  MY_ASSERT( boost::any_cast<std::string>(&constraint.data) );
-  MY_ASSERT( boost::any_cast<std::string>(constraint.data) == "xor" );
+  MY_ASSERT_DBG( constraint.children.size()>1 );
+  MY_ASSERT_DBG( boost::any_cast<std::string>(&constraint.data) );
+  MY_ASSERT_DBG( boost::any_cast<std::string>(constraint.data) == "xor" );
   std::vector<int> basic_clause;
   get_basic_clause(cnf, constraint, basic_clause);
   for (size_t n= 0; n<=basic_clause.size(); n+= 2) {
@@ -158,7 +158,7 @@ add_anf_constraint(const tree_node& constraint,
 	 }
   } else if (boost::any_cast<int>(&constraint.data)) {
 	 int var= boost::any_cast<int>(constraint.data);
-	 MY_ASSERT( var>=0 );
+	 MY_ASSERT_DBG( var>=0 );
 	 pedcnf_t::clause_t clause;
 	 clause.insert(var);
 	 cnf.add_clause(clause);

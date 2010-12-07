@@ -98,7 +98,7 @@ public:
 private:
 
   int homozygous_genotype_to_code(const g& gen) const {
-	 MY_ASSERT(is_homozigous(gen));
+	 MY_ASSERT_DBG(is_homozigous(gen));
 	 if (gen == g::HOMO1) {
 		return 0;
 	 } else {
@@ -128,7 +128,7 @@ private:
 // + spi
 		  constraint.children.push_back(spi);
 		} else {
-		  MY_ASSERT(!is_genotyped(parent_g));
+		  MY_ASSERT_DBG(!is_genotyped(parent_g));
 // + (spi * wpl)
 		  tree_node wpl(cnf.get_w(progr_id_parent, locus));
 		  tree_node int_constraint("and");
@@ -151,7 +151,7 @@ private:
 // do nothing
 		  }
 		} else {
-		  MY_ASSERT(!is_genotyped(individual_g));
+		  MY_ASSERT_DBG(!is_genotyped(individual_g));
 		  if (is_mother) {
 			 tree_node wil(cnf.get_w(progr_id_ind, locus));
 // + wil
@@ -161,7 +161,7 @@ private:
 	 }
 	 constant = constant % 2;
 	 if (constraint.children.empty()) {
-		MY_ASSERT(constant == 0);
+		MY_ASSERT_DBG(constant == 0);
 		L_TRACE("     ANF: empty");
 	 } else {
 		if (constraint.children.size() == 1) {

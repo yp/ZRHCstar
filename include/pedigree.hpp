@@ -172,11 +172,11 @@ public:
 	 void set_id(const id_t& real_id) {
 		TRACE("Changing id of individual " << _progr_id << " from " <<
 				(id()) << " to " << real_id);
-		MY_ASSERT((real_id == id()) ||
-					 (real_id == not_existent_id) ||
-					 (_p.get_progr_id(real_id) == not_existent_progr));
+		MY_ASSERT_DBG((real_id == id()) ||
+						  (real_id == not_existent_id) ||
+						  (_p.get_progr_id(real_id) == not_existent_progr));
 		if (id() != not_existent_id) {
-		  MY_ASSERT(_p.get_progr_id(id()) == _progr_id);
+		  MY_ASSERT_DBG(_p.get_progr_id(id()) == _progr_id);
 		  _p._real2progr.erase(_p._real_ids[_progr_id]);
 		}
 		_p._real_ids[_progr_id]= real_id;
@@ -233,22 +233,22 @@ public:
 		return _p._fathers[_progr_id]!=not_existent_progr;
 	 }
 	 const individual_t& father() const {
-		MY_ASSERT(has_father());
+		MY_ASSERT_DBG(has_father());
 		return _p._indivs[_p._fathers[_progr_id]];
 	 }
 	 individual_t& father() {
-		MY_ASSERT(has_father());
+		MY_ASSERT_DBG(has_father());
 		return _p._indivs[_p._fathers[_progr_id]];
 	 }
 	 bool has_mother() const {
 		return _p._mothers[_progr_id]!=not_existent_progr;
 	 }
 	 const individual_t& mother() const {
-		MY_ASSERT(has_mother());
+		MY_ASSERT_DBG(has_mother());
 		return _p._indivs[_p._mothers[_progr_id]];
 	 }
 	 individual_t& mother() {
-		MY_ASSERT(has_mother());
+		MY_ASSERT_DBG(has_mother());
 		return _p._indivs[_p._mothers[_progr_id]];
 	 }
 	 bool has_children() const {
@@ -343,7 +343,7 @@ public:
 
   individual_t& add_individual(const id_t& real_id) {
 	 MY_ASSERT( real_id != not_existent_id );
-	 MY_ASSERT( ! exists(real_id) );
+	 MY_ASSERT_DBG( ! exists(real_id) );
 	 individual_t& ind= add_individual();
 	 ind.set_id(real_id);
 	 return ind;
@@ -351,25 +351,25 @@ public:
 
   individual_t& get_by_progr(const size_t progr_id) {
 	 TRACE("Getting individual with progr_id = " << progr_id);
-	 MY_ASSERT(progr_id < _indivs.size());
+	 MY_ASSERT_DBG(progr_id < _indivs.size());
 	 return _indivs[progr_id];
   }
 
   const individual_t& get_by_progr(const size_t progr_id) const {
 	 TRACE("Getting individual with progr_id = " << progr_id);
-	 MY_ASSERT(progr_id < _indivs.size());
+	 MY_ASSERT_DBG(progr_id < _indivs.size());
 	 return _indivs[progr_id];
   }
 
   individual_t& get_by_id(const id_t& real_id) {
 	 TRACE("Getting individual with real_id = " << real_id);
-	 MY_ASSERT(real_id != not_existent_id);
+	 MY_ASSERT_DBG(real_id != not_existent_id);
 	 return get_by_progr(get_progr_id(real_id));
   }
 
   const individual_t& get_by_id(const id_t& real_id) const {
 	 TRACE("Getting individual with real_id = " << real_id);
-	 MY_ASSERT(real_id != not_existent_id);
+	 MY_ASSERT_DBG(real_id != not_existent_id);
 	 return get_by_progr(get_progr_id(real_id));
   }
 
@@ -379,7 +379,7 @@ public:
 
   individual_t& get_by_id_or_create(const id_t& real_id) {
 	 TRACE("Searching for individual with real_id = " << real_id);
-	 MY_ASSERT(real_id != not_existent_id);
+	 MY_ASSERT_DBG(real_id != not_existent_id);
 	 size_t progr= get_progr_id(real_id);
 	 if (progr == not_existent_progr) {
 		TRACE("Individual not found. Creating...");
@@ -629,12 +629,12 @@ public:
   }
 
   pedigree_t& operator[](size_t i) {
-	 MY_ASSERT(i < _families.size());
+	 MY_ASSERT_DBG(i < _families.size());
 	 return _families[i];
   }
 
   const pedigree_t& operator[](size_t i) const {
-	 MY_ASSERT(i < _families.size());
+	 MY_ASSERT_DBG(i < _families.size());
 	 return _families[i];
   }
 

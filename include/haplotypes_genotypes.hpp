@@ -209,7 +209,7 @@ public:
 
 template <typename h_t, typename g_t>
 const h_t& homozygous_to_haplotype(const g_t& g) {
-  MY_ASSERT( (g == g_t::HOMO1) || (g == g_t::HOMO2) );
+  MY_ASSERT_DBG( (g == g_t::HOMO1) || (g == g_t::HOMO2) );
   if        ( g == g_t::HOMO1 ) {
 	 return h_t::ALLELE1;
   } else if ( g == g_t::HOMO2 ) {
@@ -361,12 +361,12 @@ public:
   }
 
   const base& operator[](const size_t pos) const {
-	 MY_ASSERT(pos < _len);
+	 MY_ASSERT_DBG(pos < _len);
 	 return _v[pos];
   }
 
   base& operator[](const size_t pos) {
-	 MY_ASSERT(pos < _len);
+	 MY_ASSERT_DBG(pos < _len);
 	 return _v[pos];
   }
 
@@ -424,8 +424,8 @@ bool
 multilocus_haplotype_genotype_consistent(const h_t& h1,
 													  const h_t& h2,
 													  const g_t& g) {
-  MY_ASSERT(g.size() == h1.size());
-  MY_ASSERT(g.size() == h2.size());
+  MY_ASSERT_DBG(g.size() == h1.size());
+  MY_ASSERT_DBG(g.size() == h2.size());
   const typename g_t::base* git= g.begin();
   const typename h_t::base* h1it= h1.begin();
   const typename h_t::base* h2it= h2.begin();
@@ -442,8 +442,8 @@ bool
 strict_multilocus_haplotype_genotype_consistent(const h_t& h1,
 																const h_t& h2,
 																const g_t& g) {
-  MY_ASSERT(g.size() == h1.size());
-  MY_ASSERT(g.size() == h2.size());
+  MY_ASSERT_DBG(g.size() == h1.size());
+  MY_ASSERT_DBG(g.size() == h2.size());
   const typename g_t::base* git= g.begin();
   const typename h_t::base* h1it= h1.begin();
   const typename h_t::base* h2it= h2.begin();
