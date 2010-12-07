@@ -67,6 +67,17 @@ protected:
 		throw std::logic_error(std::string("At least one of the options '")
 									  + opt1 + "' or '" + opt2 + "' must be specified.");
   }
+  void mode_options(const po::variables_map& vm,
+						  const char* opt1,
+						  const char* opt2,
+						  const char* opt3) const {
+	 TRACE("Checking alternative options '" << opt1 <<
+			 "', '" << opt2 << "', and '" << opt3 << "'.");
+	 if (!vm[opt1].as<bool>() && !vm[opt2].as<bool>() && !vm[opt3].as<bool>())
+		throw std::logic_error(std::string("At least one of the options '")
+									  + opt1 + "', '" + opt2 + "', or '" + opt3 +
+									  "' must be specified.");
+  }
 // Function used to check that 'opt1' and 'opt2' are not specified
 // at the same time.
   void conflicting_options(const po::variables_map& vm,
