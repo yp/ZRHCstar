@@ -102,6 +102,15 @@ public:
 													  const std::vector<std::string>& headers) const {
 	 pedigree_t ped;
 	 pedcnf_t cnf;
+	 create_SAT_instance_from_pedigree(ped_is, sat_os, headers,
+												  ped, cnf);
+  }
+
+  void create_SAT_instance_from_pedigree(std::istream& ped_is,
+													  std::ostream& sat_os,
+													  const std::vector<std::string>& headers,
+													  pedigree_t& ped,
+													  pedcnf_t& cnf) const {
 	 prepare_pedigree_and_sat(ped_is, ped, cnf);
 // Output the instance
 	 L_INFO("Saving SAT instance...");
@@ -116,7 +125,12 @@ public:
 											  pedigree_t& ped,
 											  pedcnf_t& cnf) const {
 	 prepare_pedigree_and_sat(ped_is, ped, cnf);
+	 return compute_HC_from_SAT_results(res_is, ped, cnf);
+  };
 
+  bool compute_HC_from_SAT_results(std::istream& res_is,
+											  pedigree_t& ped,
+											  pedcnf_t& cnf) const {
 // Open the result file and read the assignment
 	 const bool is_sat= read_SAT_results(cnf, res_is);
 
@@ -152,6 +166,20 @@ public:
 	 pedcnf_t cnf;
 	 const bool is_sat=
 		compute_HC_from_SAT_results(ped_is, res_is,
+											 ped, cnf);
+	 if (is_sat) {
+// Output the haplotype configuration
+		save_ZRHC(ped, hap_os);
+	 }
+	 return is_sat;
+  }
+
+  bool compute_HC_from_SAT_results(pedigree_t& ped,
+											  pedcnf_t& cnf,
+											  std::istream& res_is,
+											  std::ostream& hap_os) const {
+	 const bool is_sat=
+		compute_HC_from_SAT_results(res_is,
 											 ped, cnf);
 	 if (is_sat) {
 // Output the haplotype configuration
