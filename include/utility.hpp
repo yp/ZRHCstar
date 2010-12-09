@@ -46,7 +46,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/ptr_container/ptr_list.hpp>
 
 
 #include "assertion.hpp"
@@ -200,11 +204,10 @@ class file_utility:
   public log_able_t<file_utility> {
 
 private:
+
   file_utility() {};
 
 public:
-
-  typedef boost::iostreams::stream<boost::iostreams::file_descriptor_sink> otmpstream;
 
   typedef boost::shared_ptr<std::istream> pistream;
   typedef boost::shared_ptr<std::ostream> postream;
@@ -215,36 +218,55 @@ public:
 	 return fu;
   };
 
-  pistream get_ifstream(const std::string& file_name) const {
+  pistream get_ifstream(const std::string& file_name,
+								const bool compressed=false) const {
 	 L_DEBUG("Opening file '" << file_name << "' for reading...");
-	 std::ifstream* is= new std::ifstream;
-	 pistream pis(is);
-	 is->open(file_name);
-	 if (!is->is_open()) {
+	 boost::iostreams::file_source source(file_name);
+	 if (!source.is_open()) {
 		L_ERROR("Impossible to open file '" << file_name << "' for reading.");
 		throw std::logic_error(std::string("Impossible to open file '")
 									  + file_name + "' for reading.");
 	 }
 	 L_DEBUG("File '" << file_name << "' successfully opened.");
-	 return pis;
+	 std::istream* is;
+	 if (compressed) {
+		L_DEBUG("...setting file '" << file_name << "' as gzip-ed.");
+		boost::iostreams::filtering_istream* gis= new boost::iostreams::filtering_istream;
+		gis->push(boost::iostreams::gzip_decompressor());
+		gis->push(source);
+		is= gis;
+	 } else {
+		is= new boost::iostreams::stream<boost::iostreams::file_source>(source);
+	 }
+	 return pistream(is);
   };
 
-  postream get_ofstream(const std::string& file_name) const {
+  postream get_ofstream(const std::string& file_name,
+								const bool compressed=false) const {
 	 L_DEBUG("Opening file '" << file_name << "' for writing...");
-	 std::ofstream* os= new std::ofstream;
-	 postream pos(os);
-	 os->open(file_name);
-	 if (!os->is_open()) {
+	 boost::iostreams::file_sink sink(file_name);
+	 if (!sink.is_open()) {
 		L_ERROR("Impossible to open file '" << file_name << "' for writing.");
 		throw std::logic_error(std::string("Impossible to open file '")
 									  + file_name + "' for writing.");
 	 }
 	 L_DEBUG("File '" << file_name << "' successfully opened.");
-	 return pos;
+	 std::ostream* os;
+	 if (compressed) {
+		L_DEBUG("...setting file '" << file_name << "' as gzip-ed.");
+		boost::iostreams::filtering_ostream* gos= new boost::iostreams::filtering_ostream;
+		gos->push(boost::iostreams::gzip_compressor());
+		gos->push(sink);
+		os= gos;
+	 } else {
+		os= new boost::iostreams::stream<boost::iostreams::file_sink>(sink);
+	 }
+	 return postream(os);
   };
 
   postream get_tmp_ostream(const std::string file_template,
-									std::string& real_name) const {
+									std::string& real_name,
+									const bool compressed=false) const {
 	 L_DEBUG("Opening a temporary file with hint '" << file_template <<
 				"' for writing...");
 	 MY_ASSERT(boost::ends_with(file_template, "XXXXXX"));
@@ -260,15 +282,24 @@ public:
 		throw std::logic_error(std::string("Impossible to open a temporary file with hint '")
 									  + file_template + "' for writing.");
 	 }
-	 otmpstream* os= new otmpstream;
-	 postream pos(os);
-	 os->open(boost::iostreams::file_descriptor_sink(fd));
-	 if (!os->is_open()) {
+	 boost::iostreams::file_descriptor_sink sink(fd);
+	 if (!sink.is_open()) {
 		L_ERROR("Impossible to open file '" << name << "' for writing.");
 		throw std::logic_error(std::string("Impossible to open file '")
 									  + name + "' for writing.");
 	 }
 	 L_INFO("File '" << real_name << "' successfully opened.");
+	 std::ostream* os;
+	 if (compressed) {
+		L_DEBUG("...setting file '" << real_name << "' as gzip-ed.");
+		boost::iostreams::filtering_ostream* gos= new boost::iostreams::filtering_ostream;
+		gos->push(boost::iostreams::gzip_compressor());
+		gos->push(sink);
+		os= gos;
+	 } else {
+		os= new boost::iostreams::stream<boost::iostreams::file_descriptor_sink>(sink);
+	 }
+	 postream pos(os);
 	 return pos;
   };
 

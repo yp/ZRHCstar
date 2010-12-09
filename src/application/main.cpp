@@ -92,6 +92,12 @@ protected:
 		 "%%INPUT%% and %%OUTPUT%% are markers used to represent the input and the output file "
 		 "of the solver and they are automatically substituted by the program into the "
 		 "corresponding filenames.")
+		("compress,z", po::bool_switch()->default_value(false),
+		 "Use compressed input and output files.")
+		("compress-input", po::bool_switch()->default_value(false),
+		 "Use compressed input files.")
+		("compress-output", po::bool_switch()->default_value(false),
+		 "Use compressed output files.")
 		;
 	 return desc;
   };
@@ -124,6 +130,13 @@ protected:
 	 option_dependency(vm, "create-read", "sat-cmdline");
 	 DEBUG("Check completed.");
 
+	 const bool in_compress=
+		vm["compress"].as<bool>() ||
+		vm["compress-input"].as<bool>();
+	 const bool out_compress=
+		vm["compress"].as<bool>() ||
+		vm["compress-output"].as<bool>();
+
 	 zrhcstar_t zrhcstar;
 
 // Dispatch the work depending on the program parameters
@@ -134,10 +147,10 @@ protected:
 
 		file_utility::pistream ped_is=
 		  file_utility::get_file_utility().
-		  get_ifstream(vm["pedigree"].as<string>());
+		  get_ifstream(vm["pedigree"].as<string>(), in_compress);
 		file_utility::postream sat_os=
 		  file_utility::get_file_utility().
-		  get_ofstream(vm["sat"].as<string>());
+		  get_ofstream(vm["sat"].as<string>(), out_compress);
 		const std::string headers[] = {
 		  "SAT instance",
 		  std::string("pedigree: ") + vm["pedigree"].as<string>(),
@@ -162,13 +175,13 @@ protected:
 			  << vm["result"].as<string>() << "'...");
 		file_utility::pistream ped_is=
 		  file_utility::get_file_utility().
-		  get_ifstream(vm["pedigree"].as<string>());
+		  get_ifstream(vm["pedigree"].as<string>(), in_compress);
 		file_utility::pistream res_is=
 		  file_utility::get_file_utility().
-		  get_ifstream(vm["result"].as<string>());
+		  get_ifstream(vm["result"].as<string>(), in_compress);
 		file_utility::postream hap_os=
 		  file_utility::get_file_utility().
-		  get_ofstream(vm["haplotypes"].as<string>());
+		  get_ofstream(vm["haplotypes"].as<string>(), out_compress);
 		bool is_zrhc=
 		  zrhcstar.compute_HC_from_SAT_results(*ped_is, *res_is, *hap_os);
 
@@ -186,25 +199,30 @@ protected:
 		INFO("Computation of the haplotype configuration from the "
 			  "pedigree of file '"
 			  << vm["pedigree"].as<string>() << "' by direct invocation of the SAT solver...");
-		file_utility::pistream ped_is=
-		  file_utility::get_file_utility().
-		  get_ifstream(vm["pedigree"].as<string>());
 		string sat_name;
-		file_utility::postream sat_os=
-		  file_utility::get_file_utility().
-		  get_tmp_ostream("cnf-instance-XXXXXX", sat_name);
-		const std::string headers[] = {
-		  "SAT instance",
-		  std::string("pedigree: ") + vm["pedigree"].as<string>(),
-		  std::string("sat: ") + sat_name,
-		  std::string("source version: ") + APPLICATION_SOURCE_VERSION
-		};
 		zrhcstar_t::pedigree_t ped;
 		pedcnf_t cnf;
-		zrhcstar.create_SAT_instance_from_pedigree(*ped_is, *sat_os,
-																 vector<string>(headers,
-																					 headers+4),
-																 ped, cnf);
+// Block for reading the pedigree and writing the SAT instance
+// The block is needed to close the SAT instance stream before executing
+// the solver
+		{
+		  file_utility::pistream ped_is=
+			 file_utility::get_file_utility().
+			 get_ifstream(vm["pedigree"].as<string>(), in_compress);
+		  file_utility::postream sat_os=
+			 file_utility::get_file_utility().
+			 get_tmp_ostream("cnf-instance-XXXXXX", sat_name, out_compress);
+		  const std::string headers[] = {
+			 "SAT instance",
+			 std::string("pedigree: ") + vm["pedigree"].as<string>(),
+			 std::string("sat: ") + sat_name,
+			 std::string("source version: ") + APPLICATION_SOURCE_VERSION
+		  };
+		  zrhcstar.create_SAT_instance_from_pedigree(*ped_is, *sat_os,
+																	vector<string>(headers,
+																						headers+4),
+																	ped, cnf);
+		}
 
 // Execute the SAT solver
 		INFO("Execution of the SAT solver...");
@@ -229,10 +247,10 @@ protected:
 // Read the results and compute the haplotype configuration
 		  file_utility::pistream res_is=
 			 file_utility::get_file_utility().
-			 get_ifstream(res_name);
+			 get_ifstream(res_name, false); // The SAT result is always not compressed
 		  file_utility::postream hap_os=
 			 file_utility::get_file_utility().
-			 get_ofstream(vm["haplotypes"].as<string>());
+			 get_ofstream(vm["haplotypes"].as<string>(), out_compress);
 		  bool is_zrhc= zrhcstar.compute_HC_from_SAT_results(ped, cnf,
 																			  *res_is, *hap_os);
 
