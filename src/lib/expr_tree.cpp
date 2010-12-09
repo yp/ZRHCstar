@@ -32,7 +32,7 @@
  *
  **/
 
-#include "tree.hpp"
+#include "expr_tree.hpp"
 
 #include "log.hpp"
 #include "assertion.hpp"
@@ -47,7 +47,7 @@ print_boost_any(std::ostream& out, const boost::any& i) {
 }
 
 std::ostream&
-operator<< (std::ostream& out, const tree_node& node) {
+operator<< (std::ostream& out, const expr_tree_node& node) {
   MY_ASSERT_DBG( ( !node.data.empty() ) || node.children.empty() );
   if (!node.data.empty()) {
 	 if (node.children.empty()) {
@@ -55,7 +55,7 @@ operator<< (std::ostream& out, const tree_node& node) {
 	 } else {
 		out << "( ";
 		bool first= node.children.size()>1;
-		for (std::list<tree_node>::const_iterator it= node.children.begin();
+		for (std::list<expr_tree_node>::const_iterator it= node.children.begin();
 			  it != node.children.end();
 			  ++it) {
 		  if (!first) {

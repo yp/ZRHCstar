@@ -26,14 +26,14 @@
  **/
 /**
  *
- * tree.hpp
+ * expr_tree.hpp
  *
- * Representation of a generic tree
+ * Representation of a generic expression tree
  *
  **/
 
-#ifndef __TREE_HPP__
-#define __TREE_HPP__
+#ifndef __EXPR_TREE_HPP__
+#define __EXPR_TREE_HPP__
 
 #include "utility.hpp"
 
@@ -43,30 +43,30 @@
 
 #include <ostream>
 
-class tree_node {
+class expr_tree_node {
 public:
   boost::any data;
-  std::list<tree_node> children;
+  std::list<expr_tree_node> children;
 
-  tree_node()
+  expr_tree_node()
   {};
 
-  explicit tree_node(const char* _data)
+  explicit expr_tree_node(const char* _data)
 		:data(std::string(_data))
   {};
 
   template <typename T>
-  explicit tree_node(const T& _data)
+  explicit expr_tree_node(const T& _data)
 		:data(_data)
   {};
 };
 
 
 std::ostream&
-operator<< (std::ostream& out, const tree_node& node);
+operator<< (std::ostream& out, const expr_tree_node& node);
 
 
 
 
 
-#endif // __TREE_HPP__
+#endif // __EXPR_TREE_HPP__

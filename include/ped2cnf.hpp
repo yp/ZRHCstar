@@ -38,7 +38,7 @@
 
 #include "data.hpp"
 #include "log.hpp"
-#include "tree.hpp"
+#include "expr_tree.hpp"
 #include "utility.hpp"
 #include "pedcnf.hpp"
 
@@ -51,7 +51,7 @@
 
 
 void
-add_anf_constraint(const tree_node& constraint,
+add_anf_constraint(const expr_tree_node& constraint,
 						 pedcnf_t& cnf);
 
 
@@ -114,24 +114,24 @@ private:
 							 const size_t progr_id_parent,
 							 const size_t progr_id_ind,
 							 const bool is_mother) {
-	 tree_node constraint("xor");
+	 expr_tree_node constraint("xor");
 	 int constant= 0;
 // First side of the equation
 	 if (is_homozigous(parent_g)) {
 		constant+= homozygous_genotype_to_code(parent_g);
 	 } else {
-		tree_node hpl(cnf.get_h(progr_id_parent, locus));
+		expr_tree_node hpl(cnf.get_h(progr_id_parent, locus));
 // + hpl
 		constraint.children.push_back(hpl);
-		tree_node spi(cnf.get_s(progr_id_parent, progr_id_ind));
+		expr_tree_node spi(cnf.get_s(progr_id_parent, progr_id_ind));
 		if (is_heterozygous(parent_g)) {
 // + spi
 		  constraint.children.push_back(spi);
 		} else {
 		  MY_ASSERT_DBG(!is_genotyped(parent_g));
 // + (spi * wpl)
-		  tree_node wpl(cnf.get_w(progr_id_parent, locus));
-		  tree_node int_constraint("and");
+		  expr_tree_node wpl(cnf.get_w(progr_id_parent, locus));
+		  expr_tree_node int_constraint("and");
 		  int_constraint.children.push_back(spi);
 		  int_constraint.children.push_back(wpl);
 		  constraint.children.push_back(int_constraint);
@@ -141,7 +141,7 @@ private:
 	 if (is_homozigous(individual_g)) {
 		constant+= homozygous_genotype_to_code(individual_g);
 	 } else {
-		tree_node hil(cnf.get_h(progr_id_ind, locus));
+		expr_tree_node hil(cnf.get_h(progr_id_ind, locus));
 // + hil
 		constraint.children.push_back(hil);
 		if (is_heterozygous(individual_g)) {
@@ -153,7 +153,7 @@ private:
 		} else {
 		  MY_ASSERT_DBG(!is_genotyped(individual_g));
 		  if (is_mother) {
-			 tree_node wil(cnf.get_w(progr_id_ind, locus));
+			 expr_tree_node wil(cnf.get_w(progr_id_ind, locus));
 // + wil
 			 constraint.children.push_back(wil);
 		  }
@@ -168,7 +168,7 @@ private:
 		  constraint= constraint.children.front();
 		}
 		if (constant == 0) {
-		  tree_node new_constraint("not");
+		  expr_tree_node new_constraint("not");
 		  new_constraint.children.push_back(constraint);
 		  constraint= new_constraint;
 		}
