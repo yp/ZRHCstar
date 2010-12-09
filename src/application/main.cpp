@@ -37,10 +37,7 @@
 #include <fstream>
 
 #include <boost/static_assert.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/filesystem.hpp>
 
 #ifndef EXIT_NO_ZRHC
@@ -62,58 +59,6 @@ public:
 
 private:
 
-  ifstream& get_ifstream(const string& file_name, ifstream& is) const {
-	 DEBUG("Opening file '" << file_name << "' for reading...");
-	 is.open(file_name);
-	 if (!is.is_open()) {
-		ERROR("Impossible to open file '" << file_name << "' for reading.");
-		throw logic_error(string("Impossible to open file '")
-								+ file_name + "' for reading.");
-	 }
-	 DEBUG("File '" << file_name << "' successfully opened.");
-	 return is;
-  };
-
-  ofstream& get_ofstream(const string& file_name, ofstream& os) const {
-	 DEBUG("Opening file '" << file_name << "' for writing...");
-	 os.open(file_name);
-	 if (!os.is_open()) {
-		ERROR("Impossible to open file '" << file_name << "' for writing.");
-		throw logic_error(string("Impossible to open file '")
-								+ file_name + "' for writing.");
-	 }
-	 DEBUG("File '" << file_name << "' successfully opened.");
-	 return os;
-  };
-
-  typedef boost::iostreams::stream<boost::iostreams::file_descriptor_sink> otmpstream;
-
-  ostream& get_tmp_ostream(const string file_template, otmpstream& os,
-									string& real_name) const {
-	 DEBUG("Opening a temporary file with hint '" << file_template <<
-			 "' for writing...");
-	 MY_ASSERT(boost::ends_with(file_template, "XXXXXX"));
-	 const size_t name_len= strlen(file_template.c_str());
-	 char* name= (char*)calloc(name_len+1, sizeof(char));
-	 strncpy(name, file_template.c_str(), name_len+1);
-	 const int fd= mkstemp(name);
-	 real_name= string(name);
-	 free(name);
-	 if (fd == -1) {
-		ERROR("Impossible to open a temporary file with hint '" << file_template
-				<< "' for writing.");
-		throw logic_error(string("Impossible to open a temporary file with hint '")
-								+ file_template + "' for writing.");
-	 }
-	 os.open(boost::iostreams::file_descriptor_sink(fd));
-	 if (!os.is_open()) {
-		ERROR("Impossible to open file '" << name << "' for writing.");
-		throw logic_error(string("Impossible to open file '")
-								+ name + "' for writing.");
-	 }
-	 INFO("File '" << real_name << "' successfully opened.");
-	 return os;
-  };
 
 protected:
 
@@ -187,22 +132,22 @@ protected:
 		INFO("Creation of the SAT instance from the pedigree of file '"
 			  << vm["pedigree"].as<string>() << "'...");
 
-		ifstream ped_is;
-		get_ifstream(vm["pedigree"].as<string>(), ped_is);
-		ofstream sat_os;
-		get_ofstream(vm["sat"].as<string>(), sat_os);
+		file_utility::pistream ped_is=
+		  file_utility::get_file_utility().
+		  get_ifstream(vm["pedigree"].as<string>());
+		file_utility::postream sat_os=
+		  file_utility::get_file_utility().
+		  get_ofstream(vm["sat"].as<string>());
 		const std::string headers[] = {
 		  "SAT instance",
 		  std::string("pedigree: ") + vm["pedigree"].as<string>(),
 		  std::string("sat: ") + vm["sat"].as<string>(),
 		  std::string("source version: ") + APPLICATION_SOURCE_VERSION
 		};
-		zrhcstar.create_SAT_instance_from_pedigree(ped_is,
-																 sat_os,
+		zrhcstar.create_SAT_instance_from_pedigree(*ped_is,
+																 *sat_os,
 																 vector<string>(headers,
 																					 headers+4));
-		ped_is.close();
-		sat_os.close();
 
 		INFO("SAT instance successfully created and saved.");
 
@@ -215,17 +160,18 @@ protected:
 			  << vm["pedigree"].as<string>()
 			  << "' and the results of the SAT solver stored in file '"
 			  << vm["result"].as<string>() << "'...");
-		ifstream ped_is;
-		get_ifstream(vm["pedigree"].as<string>(), ped_is);
-		ifstream res_is;
-		get_ifstream(vm["result"].as<string>(), res_is);
-		ofstream hap_os;
-		get_ofstream(vm["haplotypes"].as<string>(), hap_os);
+		file_utility::pistream ped_is=
+		  file_utility::get_file_utility().
+		  get_ifstream(vm["pedigree"].as<string>());
+		file_utility::pistream res_is=
+		  file_utility::get_file_utility().
+		  get_ifstream(vm["result"].as<string>());
+		file_utility::postream hap_os=
+		  file_utility::get_file_utility().
+		  get_ofstream(vm["haplotypes"].as<string>());
 		bool is_zrhc=
-		  zrhcstar.compute_HC_from_SAT_results(ped_is, res_is, hap_os);
-		ped_is.close();
-		res_is.close();
-		hap_os.close();
+		  zrhcstar.compute_HC_from_SAT_results(*ped_is, *res_is, *hap_os);
+
 		if (is_zrhc) {
 		  INFO("Zero-Recombinant Haplotype Configuration successfully "
 				 "computed and saved.");
@@ -240,11 +186,13 @@ protected:
 		INFO("Computation of the haplotype configuration from the "
 			  "pedigree of file '"
 			  << vm["pedigree"].as<string>() << "' by direct invocation of the SAT solver...");
-		ifstream ped_is;
-		get_ifstream(vm["pedigree"].as<string>(), ped_is);
-		otmpstream sat_os;
+		file_utility::pistream ped_is=
+		  file_utility::get_file_utility().
+		  get_ifstream(vm["pedigree"].as<string>());
 		string sat_name;
-		get_tmp_ostream("cnf-instance-XXXXXX", sat_os, sat_name);
+		file_utility::postream sat_os=
+		  file_utility::get_file_utility().
+		  get_tmp_ostream("cnf-instance-XXXXXX", sat_name);
 		const std::string headers[] = {
 		  "SAT instance",
 		  std::string("pedigree: ") + vm["pedigree"].as<string>(),
@@ -253,12 +201,10 @@ protected:
 		};
 		zrhcstar_t::pedigree_t ped;
 		pedcnf_t cnf;
-		zrhcstar.create_SAT_instance_from_pedigree(ped_is, sat_os,
+		zrhcstar.create_SAT_instance_from_pedigree(*ped_is, *sat_os,
 																 vector<string>(headers,
 																					 headers+4),
 																 ped, cnf);
-		ped_is.close();
-		sat_os.close();
 
 // Execute the SAT solver
 		INFO("Execution of the SAT solver...");
@@ -281,14 +227,15 @@ protected:
 		  main_ris= EXIT_NO_ZRHC;
 		} else {
 // Read the results and compute the haplotype configuration
-		  ifstream res_is;
-		  get_ifstream(res_name, res_is);
-		  ofstream hap_os;
-		  get_ofstream(vm["haplotypes"].as<string>(), hap_os);
+		  file_utility::pistream res_is=
+			 file_utility::get_file_utility().
+			 get_ifstream(res_name);
+		  file_utility::postream hap_os=
+			 file_utility::get_file_utility().
+			 get_ofstream(vm["haplotypes"].as<string>());
 		  bool is_zrhc= zrhcstar.compute_HC_from_SAT_results(ped, cnf,
-																			  res_is, hap_os);
-		  res_is.close();
-		  hap_os.close();
+																			  *res_is, *hap_os);
+
 		  if (is_zrhc) {
 			 INFO("Zero-Recombinant Haplotype Configuration successfully "
 					"computed and saved.");
