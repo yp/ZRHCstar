@@ -68,6 +68,8 @@ private:
 		throw std::logic_error(std::string("The pedigree has more than one family."));
 	 }
 
+	 mped.print_stats();
+
 // Prepare the SAT instance
 	 L_INFO("Preparing SAT instance from pedigree...");
 	 cnf= ped2cnf(mped.families().front());

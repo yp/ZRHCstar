@@ -238,6 +238,10 @@ public:
 			 L_TRACE(std::setw(4) << i << ")  " << tostr(*it));
 		  }
 		}
+	 } else {
+		L_INFO("The SAT instance is composed by " <<
+				 std::setw(8) << cnf.vars().size() << " variables and " <<
+				 std::setw(8) << cnf.clauses().size() << " clauses");
 	 }
 	 return cnf;
   };

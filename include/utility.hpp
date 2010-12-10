@@ -305,4 +305,21 @@ public:
 
 };
 
+
+class percent_t {
+
+public:
+  const double val;
+  const double tot;
+
+  percent_t(const double val_,
+				const double tot_)
+		:val(val_), tot(tot_)
+  {};
+};
+
+std::ostream&
+operator<<(std::ostream& out, const percent_t& val);
+
+
 #endif // __UTILITY_HPP__

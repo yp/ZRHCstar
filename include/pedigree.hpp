@@ -41,6 +41,7 @@
 #include <list>
 #include <map>
 #include <iostream>
+#include <iomanip>
 #include <climits>
 
 #include <boost/utility.hpp>
@@ -51,6 +52,14 @@
 #include "assertion.hpp"
 #include "gender.hpp"
 #include "haplotypes_genotypes.hpp"
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/sum.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+
 
 template <typename T>
 class not_existent_id_t {
@@ -557,6 +566,50 @@ public:
 	 }
 	 return zr;
   }
+
+  void print_stats() const {
+	 using namespace boost::accumulators;
+	 INFO("No. of individuals: " << std::setw(10) << size());
+	 INFO("Genotype length:    " << std::setw(10) << genotype_length());
+	 const double tot_len= size() * genotype_length();
+	 accumulator_set<size_t, stats<tag::sum, tag::min, tag::max, tag::mean> > acc_g_miss;
+	 accumulator_set<double, stats<tag::sum, tag::min, tag::max, tag::mean> > acc_hom_d;
+	 accumulator_set<double, stats<tag::sum, tag::min, tag::max, tag::mean> > acc_hom;
+	 BOOST_FOREACH(const individual_t& ind,
+						individuals() ) {
+		const size_t typed= std::count_if(ind.g().begin(), ind.g().end(),
+													 is_genotyped<typename gen_t::base>);
+		const size_t homoz= std::count_if(ind.g().begin(), ind.g().end(),
+													 is_homozygous<typename gen_t::base>);
+		acc_g_miss(genotype_length() - typed);
+		acc_hom(homoz);
+		acc_hom_d(((double)homoz)/ typed);
+	 }
+	 INFO("MISSING GENOTYPES:");
+	 INFO("   Total:                 " << std::setw(10) << sum(acc_g_miss) <<
+			" (" << percent_t(sum(acc_g_miss), tot_len) << "%)");
+	 INFO("   Minimum (per indiv.):  " << std::setw(10) << (min)(acc_g_miss) <<
+			" (" << percent_t((min)(acc_g_miss), genotype_length()) << "%)");
+	 INFO("   Average (per indiv.):  " << std::setw(10) << (mean)(acc_g_miss) <<
+			" (" << percent_t((mean)(acc_g_miss), genotype_length()) << "%)");
+	 INFO("   Maximum (per indiv.):  " << std::setw(10) << (max)(acc_g_miss) <<
+			" (" << percent_t((max)(acc_g_miss), genotype_length()) << "%)");
+	 const size_t typed_g= tot_len-sum(acc_g_miss);
+	 INFO("TOTAL TYPED GENOTYPES:    " << std::setw(10) << typed_g <<
+			" (" << percent_t(typed_g, tot_len) << "%)");
+	 INFO("HOMOZYGOSITY: (percentage over typed loci of each individual)");
+	 INFO("   Total   (absolute):    " << std::setw(10) << sum(acc_hom) <<
+			" (" << percent_t(sum(acc_hom), typed_g) << "%)");
+	 INFO("   Minimum (% per indiv.):  " <<
+			std::fixed << std::setw(8) << std::setprecision(3) <<
+			(min)(acc_hom_d)*100 << " %");
+	 INFO("   Average (% per indiv.):  " <<
+			std::fixed << std::setw(8) << std::setprecision(3) <<
+			(mean)(acc_hom_d)*100 << " %");
+	 INFO("   Maximum (% per indiv.):  " <<
+			std::fixed << std::setw(8) << std::setprecision(3) <<
+			(max)(acc_hom_d)*100 << " %");
+  };
 };
 
 
@@ -645,6 +698,13 @@ public:
   size_t genotype_length() const {
 	 return _len;
   }
+
+  void print_stats() const {
+	 BOOST_FOREACH(const pedigree_t& family,
+						families() ) {
+		family.print_stats();
+	 }
+  };
 
 };
 
