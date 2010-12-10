@@ -37,33 +37,94 @@
 
 #include "utility.hpp"
 
-#include <list>
-
-#include <boost/any.hpp>
+#include <boost/ptr_container/ptr_list.hpp>
 
 #include <ostream>
 
 class expr_tree_node {
-public:
-  boost::any data;
-  std::list<expr_tree_node> children;
+protected:
 
   expr_tree_node()
   {};
 
-  explicit expr_tree_node(const char* _data)
-		:data(std::string(_data))
+private:
+
+  virtual
+  expr_tree_node* clone_impl() const = 0;
+
+public:
+  virtual ~expr_tree_node()
   {};
 
-  template <typename T>
-  explicit expr_tree_node(const T& _data)
-		:data(_data)
+  expr_tree_node* clone() const {
+	 return clone_impl();
+  };
+
+};
+
+expr_tree_node* new_clone(const expr_tree_node& n);
+
+typedef enum {
+  EXPR_OP_XOR= 0,
+  EXPR_OP_NOT= 1,
+  EXPR_OP_AND= 2,
+} expr_operator_enum;
+
+
+class expr_operator_t:
+  public expr_tree_node {
+
+public:
+
+  typedef boost::ptr_list<expr_tree_node> children_t;
+
+  expr_operator_enum kind;
+
+  children_t children;
+
+  expr_operator_t(const expr_operator_enum _kind)
+		:kind(_kind)
   {};
+
+private:
+
+  expr_operator_t(const expr_operator_enum _kind,
+						const children_t& _children)
+		:kind(_kind), children(_children)
+  {};
+
+  virtual expr_operator_t* clone_impl() const {
+	 return new expr_operator_t(kind, children);
+  };
+
+};
+
+
+class expr_variable_t:
+  public expr_tree_node {
+public:
+  int variable;
+
+  expr_variable_t(const int _variable)
+		:variable(_variable)
+  {};
+
+private:
+  virtual expr_variable_t* clone_impl() const {
+	 return new expr_variable_t(variable);
+  };
+
 };
 
 
 std::ostream&
 operator<< (std::ostream& out, const expr_tree_node& node);
+
+std::ostream&
+operator<< (std::ostream& out, const expr_operator_t& op);
+
+std::ostream&
+operator<< (std::ostream& out, const expr_variable_t& var);
 
 
 

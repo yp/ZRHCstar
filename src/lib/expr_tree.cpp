@@ -37,36 +37,39 @@
 #include "log.hpp"
 #include "assertion.hpp"
 
-
-std::ostream&
-print_boost_any(std::ostream& out, const boost::any& i) {
-  if (boost::any_cast<int>(&i)) out << boost::any_cast<int>(i);
-  else if (boost::any_cast<std::string>(&i)) out << boost::any_cast<std::string>(i);
-  else out << " IMPOSSIBLE TO WRITE boost::any VALUE ";
-  return out;
-}
+expr_tree_node* new_clone(const expr_tree_node& n) {
+  return n.clone();
+};
 
 std::ostream&
 operator<< (std::ostream& out, const expr_tree_node& node) {
-  MY_ASSERT_DBG( ( !node.data.empty() ) || node.children.empty() );
-  if (!node.data.empty()) {
-	 if (node.children.empty()) {
-		print_boost_any(out, node.data);
-	 } else {
-		out << "( ";
-		bool first= node.children.size()>1;
-		for (std::list<expr_tree_node>::const_iterator it= node.children.begin();
-			  it != node.children.end();
-			  ++it) {
-		  if (!first) {
-			 print_boost_any(out, node.data) << " ";
-		  }
-		  out << (*it) << " ";
-		  first= false;
-		}
-		out << ")";
-	 }
+  if (typeid(node) == typeid(expr_operator_t)) {
+	 return out << dynamic_cast<const expr_operator_t&>(node);
+  } else if (typeid(node) == typeid(expr_variable_t)) {
+	 return out << dynamic_cast<const expr_variable_t&>(node);
+  } else {
+	 MY_FAIL;
   }
   return out;
 };
 
+
+std::ostream&
+operator<< (std::ostream& out, const expr_operator_t& op) {
+  out << "( ";
+  bool first= op.children.size()>1;
+  for (expr_operator_t::children_t::const_iterator it= op.children.begin();
+		 it != op.children.end();
+		 ++it) {
+	 out << (*it) << " ";
+	 first= false;
+  }
+  out << ")";
+  return out;
+};
+
+std::ostream&
+operator<< (std::ostream& out, const expr_variable_t& var) {
+  out << var.variable;
+  return out;
+};

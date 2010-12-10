@@ -79,28 +79,28 @@ add_constraints_for_dummy_variables(pedcnf_t& cnf,
 
 static void
 get_basic_clause(pedcnf_t& cnf,
-					  const expr_tree_node& n,
+					  const expr_operator_t& n,
 					  std::vector<int>& v) {
-  MY_ASSERT_DBG( boost::any_cast<std::string>(&n.data) );
-  MY_ASSERT_DBG( boost::any_cast<std::string>(n.data) == "xor" );
+  MY_ASSERT_DBG( n.kind == EXPR_OP_XOR );
   v.clear();
   v.reserve(n.children.size());
-  for (std::list<expr_tree_node>::const_iterator it= n.children.begin();
+  for (expr_operator_t::children_t::const_iterator it= n.children.begin();
 		 it != n.children.end();
 		 ++it) {
-	 const expr_tree_node& child= *it;
-	 if (boost::any_cast<std::string>(&child.data)) {
-		MY_ASSERT_DBG( boost::any_cast<std::string>(child.data) == "and" );
+	 const expr_tree_node& _it= *it;
+	 if (typeid(_it) == typeid(expr_operator_t)) {
+		const expr_operator_t& child= dynamic_cast<const expr_operator_t&>(_it);
+		MY_ASSERT_DBG( child.kind == EXPR_OP_AND );
 		MY_ASSERT_DBG( child.children.size() == 2 );
-		MY_ASSERT_DBG( boost::any_cast<int>(&child.children.front().data) );
-		MY_ASSERT_DBG( boost::any_cast<int>(&child.children.back().data) );
-		int var1= boost::any_cast<int>(child.children.front().data);
-		int var2= boost::any_cast<int>(child.children.back().data);
+		MY_ASSERT_DBG( typeid(child.children.front()) == typeid(expr_variable_t) );
+		MY_ASSERT_DBG( typeid(child.children.back()) == typeid(expr_variable_t) );
+		int var1= dynamic_cast<const expr_variable_t&>(child.children.front()).variable;
+		int var2= dynamic_cast<const expr_variable_t&>(child.children.back()).variable;
 		int dummy= cnf.get_dummy(var1, var2);
 		add_constraints_for_dummy_variables(cnf, var1, var2, dummy);
 		v.push_back(dummy);
-	 } else if (boost::any_cast<int>(&child.data)) {
-		int var= boost::any_cast<int>(child.data);
+	 } else if (typeid(*it) == typeid(expr_variable_t)) {
+		int var= dynamic_cast<const expr_variable_t&>(*it).variable;
 		MY_ASSERT_DBG( var>=0 );
 		v.push_back(var);
 	 }
@@ -108,19 +108,20 @@ get_basic_clause(pedcnf_t& cnf,
 }
 
 static void
-not2cnf(const expr_tree_node& constraint,
+not2cnf(const expr_operator_t& constraint,
 		  pedcnf_t& cnf) {
   MY_ASSERT_DBG( constraint.children.size()==1 );
-  const expr_tree_node& child= constraint.children.front();
-  if (boost::any_cast<std::string>(&child.data)) {
-	 MY_ASSERT_DBG( boost::any_cast<std::string>(child.data) == "xor" );
+  const expr_tree_node& _child= constraint.children.front();
+  if (typeid(_child) == typeid(expr_operator_t)) {
+	 const expr_operator_t& child= dynamic_cast<const expr_operator_t&>(_child);
+	 MY_ASSERT_DBG( child.kind == EXPR_OP_XOR );
 	 std::vector<int> basic_clause;
 	 get_basic_clause(cnf, child, basic_clause);
 	 for (size_t n= 1; n<=basic_clause.size(); n+= 2) {
 		assign(cnf, basic_clause, n, 0);
 	 }
-  } else if (boost::any_cast<int>(&child.data)) {
-	 int var= boost::any_cast<int>(child.data);
+  } else if (typeid(_child) == typeid(expr_variable_t)) {
+	 int var= dynamic_cast<const expr_variable_t&>(_child).variable;
 	 MY_ASSERT_DBG( var>=0 );
 	 pedcnf_t::clause_t clause;
 	 clause.insert(-var);
@@ -131,11 +132,10 @@ not2cnf(const expr_tree_node& constraint,
 }
 
 static void
-xor2cnf(const expr_tree_node& constraint,
+xor2cnf(const expr_operator_t& constraint,
 		  pedcnf_t& cnf) {
   MY_ASSERT_DBG( constraint.children.size()>1 );
-  MY_ASSERT_DBG( boost::any_cast<std::string>(&constraint.data) );
-  MY_ASSERT_DBG( boost::any_cast<std::string>(constraint.data) == "xor" );
+  MY_ASSERT_DBG( constraint.kind == EXPR_OP_XOR );
   std::vector<int> basic_clause;
   get_basic_clause(cnf, constraint, basic_clause);
   for (size_t n= 0; n<=basic_clause.size(); n+= 2) {
@@ -143,25 +143,38 @@ xor2cnf(const expr_tree_node& constraint,
   }
 }
 
+static void
+add_anf_constraint(const expr_operator_t& constraint,
+						 pedcnf_t& cnf) {
+  if (constraint.kind == EXPR_OP_NOT) {
+	 not2cnf(constraint, cnf);
+  } else if (constraint.kind == EXPR_OP_XOR) {
+	 xor2cnf(constraint, cnf);
+  } else {
+// Should not arrive here
+	 MY_FAIL;
+  }
+};
+
+static void
+add_anf_constraint(const expr_variable_t& constraint,
+						 pedcnf_t& cnf) {
+  const int var= constraint.variable;
+  MY_ASSERT_DBG( var>=0 );
+  pedcnf_t::clause_t clause;
+  clause.insert(var);
+  cnf.add_clause(clause);
+};
+
 void
 add_anf_constraint(const expr_tree_node& constraint,
 						 pedcnf_t& cnf) {
-  if (boost::any_cast<std::string>(&constraint.data)) {
-	 const std::string& data= boost::any_cast<std::string>(constraint.data);
-	 if (data == "not") {
-		not2cnf(constraint, cnf);
-	 } else if (data == "xor") {
-		xor2cnf(constraint, cnf);
-	 } else {
-// Should not arrive here
-		MY_FAIL;
-	 }
-  } else if (boost::any_cast<int>(&constraint.data)) {
-	 int var= boost::any_cast<int>(constraint.data);
-	 MY_ASSERT_DBG( var>=0 );
-	 pedcnf_t::clause_t clause;
-	 clause.insert(var);
-	 cnf.add_clause(clause);
+  if (typeid(constraint) == typeid(expr_operator_t)) {
+	 add_anf_constraint(dynamic_cast<const expr_operator_t&>(constraint), cnf);
+  } else if (typeid(constraint) == typeid(expr_variable_t)) {
+	 add_anf_constraint(dynamic_cast<const expr_variable_t&>(constraint), cnf);
+  } else {
+	 MY_FAIL;
   }
 };
 
