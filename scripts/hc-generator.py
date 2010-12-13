@@ -165,8 +165,8 @@ for ind in pedigree:
 # Print haplotype configuration as comment
 logging.info("Saving the generated haplotype configuration...")
 for ind in pedigree:
-    print("#", 0, ind, fathers[ind], mothers[ind], genders[ind], pheno,
-          "   ".join(["{}|{}".format(a,b)
+    print("# GENERATED_HAPLOTYPES", 0, ind, fathers[ind], mothers[ind], genders[ind], pheno,
+          "\t".join(["{}|{}".format(a,b)
                       for a,b in zip(hp[ind], hm[ind]) ] ),
           sep="\t")
 
@@ -174,6 +174,6 @@ for ind in pedigree:
 logging.info("Saving the genotyped pedigree...")
 for ind in pedigree:
     print(0, ind, fathers[ind], mothers[ind], genders[ind], pheno,
-          "   ".join(genotypes[ind]), sep="\t")
+          "\t".join(genotypes[ind]), sep="\t")
 
 logging.info("Terminated!")
