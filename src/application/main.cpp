@@ -233,7 +233,7 @@ protected:
 		boost::replace_all(cmdline, "%%OUTPUT%%", "\"" + res_name + "\"");
 		INFO("Real command line: '"<< cmdline <<"'");
 
-		remove(res_name.c_str());
+		boost::filesystem::remove(res_name);
 		const int ret_value= system(cmdline.c_str());
 // We cannot trust the return value
 		DEBUG("The SAT solver returned: '" << ret_value << "'.");
