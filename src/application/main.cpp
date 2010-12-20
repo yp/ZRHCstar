@@ -98,6 +98,9 @@ protected:
 		 "Use compressed input files.")
 		("compress-output", po::bool_switch()->default_value(false),
 		 "Use compressed output files.")
+		("keep,k", po::bool_switch()->default_value(false),
+		 "Keep temporary files (such as 'cnf-instance-*' and 'res-cnf-instance-*' "
+		 "files for '--create-read'/'-3' mode) after the execution.")
 		;
 	 return desc;
   };
@@ -253,6 +256,18 @@ protected:
 			 get_ofstream(vm["haplotypes"].as<string>(), out_compress);
 		  bool is_zrhc= zrhcstar.compute_HC_from_SAT_results(ped, cnf,
 																			  *res_is, *hap_os);
+
+		  if (!vm["keep"].as<bool>()) {
+			 DEBUG("Removing temporary files...");
+			 bool remove_res= boost::filesystem::remove(sat_name);
+			 remove_res= boost::filesystem::remove(res_name) && remove_res;
+			 if (!remove_res) {
+				WARN("File '" << sat_name << "' or '" << res_name <<
+					  "' (or both) have NOT been removed successfully. Continuing anyway...");
+			 } else {
+				DEBUG("Temporary files removed.");
+			 }
+		  }
 
 		  if (is_zrhc) {
 			 INFO("Zero-Recombinant Haplotype Configuration successfully "
