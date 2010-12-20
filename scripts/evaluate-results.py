@@ -68,11 +68,11 @@ def parse_command_line():
                       action="store_true", dest="header",
                       default=False,
                       help="print the header")
-    parser.add_option("-n", "--normalize-founders",
-                      action="store_true", dest="norm_founders",
+    parser.add_option("-n", "--dont-normalize-founders",
+                      action="store_true", dest="no_norm_founders",
                       default=False,
-                      help="swap founders' haplotypes such that the paternal allele "
-                      "at the first heterozygous and called locus is 1")
+                      help="swap founders' haplotypes such that the minimum amount of "
+                      "phase error is obtained")
     parser.add_option("-c", "--expensive-checks",
                       action="store_true", dest="checks",
                       default=False,
@@ -293,7 +293,7 @@ for individual in iter(orig_ped):
                                                                       orig_ped[individual][4],
                                                                       res_ped[individual][3],
                                                                       res_ped[individual][4],
-                                                                      options.norm_founders)
+                                                                      not options.no_norm_founders)
       
     n_gen= len(genotype)
     n_het= sum( (g == 3) for g in genotype )
