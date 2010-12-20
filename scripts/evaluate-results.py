@@ -274,7 +274,8 @@ tot_err_mask_pat_hap= 0.0
 tot_err_mask_mat_hap= 0.0
 
 if options.full and options.header:
-    print('"individual id"',
+    print('"input file"', '"result file"',
+          '"individual id"',
           '"father id"', '"mother id"',
           '"genotype_length"',
           '"heterozygous"', '"homozygous"', '"missing"',
@@ -300,7 +301,9 @@ for individual in iter(orig_ped):
     n_mis= sum( (g == 0) for g in genotype )
     
     if options.full:
-        print(individual,
+        print(options.original,
+              options.result,
+              individual,
               orig_ped[individual][1],
               orig_ped[individual][2],
               len(genotypes[individual]),
@@ -340,7 +343,9 @@ tot_err_mask_mat_hap /= n_indiv
           
 if not options.full:
     if options.header:
-        print('"pedigree size"',
+        print('"input file"',
+              '"result file"',
+              '"pedigree size"',
               '"tot genotype length"',
               '"tot heterozygous loci"',
               '"tot homozygous loci"',
@@ -357,7 +362,9 @@ if not options.full:
               '"avg maternal haplotype errors wo missing"',
               sep="\t")
 
-    print(n_indiv,
+    print(options.original,
+          options.result,
+          n_indiv,
           tot_gen,
           tot_het,
           tot_hom,
