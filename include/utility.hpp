@@ -284,9 +284,9 @@ public:
 	 }
 	 boost::iostreams::file_descriptor_sink sink(fd);
 	 if (!sink.is_open()) {
-		L_ERROR("Impossible to open file '" << name << "' for writing.");
+		L_ERROR("Impossible to open file '" << real_name << "' for writing.");
 		throw std::logic_error(std::string("Impossible to open file '")
-									  + name + "' for writing.");
+									  + real_name + "' for writing.");
 	 }
 	 L_INFO("File '" << real_name << "' successfully opened.");
 	 std::ostream* os;
