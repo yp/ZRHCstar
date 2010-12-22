@@ -182,7 +182,7 @@ while len(pedigree) < ped_size:
 
         last_father= father
         last_mother= mother
-        
+
         p_child = 1.0
         while len(pedigree) < ped_size and random.random() < p_child:
             ind= len(pedigree)+1
@@ -194,7 +194,7 @@ while len(pedigree) < ped_size:
             genders[ind]=gender
             p_child = p_add_child
             logging.debug("  new child= %4d   gender= %s", ind, "male" if gender == 1 else "female")
-        
+
         if random.random() < p_reuse_ind:
             logging.debug("Re-inserting individual %4d", father)
             males.add(father)
@@ -203,7 +203,7 @@ while len(pedigree) < ped_size:
             logging.debug("Re-inserting individual %4d", mother)
             females.add(mother)
             parents.add(mother)
-        
+
         new_gen= random.random() < 0.5
 
     logging.debug("New generation: %s", children)
@@ -215,7 +215,7 @@ while len(pedigree) < ped_size:
     females = females - parents
     females.update({ind for ind in children if genders[ind] == 2})
     logging.debug("Females: %s", females)
-    
+
 logging.info("Saving the pedigree...")
 for ind in pedigree:
     print("0",ind,fathers[ind],mothers[ind],genders[ind],sep="\t")

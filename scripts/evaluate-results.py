@@ -209,7 +209,7 @@ for r in res_ped_str:
 
 logging.info("Checking (basic) consistency...")
 if ( orig_ped.keys() != res_ped.keys() or
-     orig_ped.keys() != genotypes.keys() or 
+     orig_ped.keys() != genotypes.keys() or
      res_ped.keys() != genotypes.keys() ):
     logging.fatal("The two pedigrees refer to different individuals.")
     sys.exit(1)
@@ -256,12 +256,12 @@ for individual in iter(orig_ped):
                         sys.exit(1)
 
 logging.info("Computing differences...")
-    
+
 tot_gen= 0
 tot_het= 0
 tot_hom= 0
 tot_mis= 0
-    
+
 tot_abs_err_gen= 0
 tot_abs_err_pat_hap= 0
 tot_abs_err_mat_hap= 0
@@ -284,7 +284,7 @@ if options.full and options.header:
           '"paternal haplotype errors wo missing"', '"maternal haplotype errors wo missing"',
           sep="\t")
 for individual in iter(orig_ped):
-    
+
     genotype= genotypes[individual]
     ( err_gen,
       err_pat_hap, err_mat_hap,
@@ -294,12 +294,12 @@ for individual in iter(orig_ped):
                                                                       res_ped[individual][3],
                                                                       res_ped[individual][4],
                                                                       not options.no_norm_founders)
-      
+
     n_gen= len(genotype)
     n_het= sum( (g == 3) for g in genotype )
     n_hom= sum( (g == 1 or g == 2) for g in genotype )
     n_mis= sum( (g == 0) for g in genotype )
-    
+
     if options.full:
         print(options.original,
               options.result,
@@ -317,7 +317,7 @@ for individual in iter(orig_ped):
     tot_het += n_het
     tot_hom += n_hom
     tot_mis += n_mis
-    
+
     tot_abs_err_gen += err_gen
     tot_abs_err_pat_hap += err_pat_hap
     tot_abs_err_mat_hap += err_mat_hap
@@ -340,7 +340,7 @@ tot_err_pat_hap /= n_indiv
 tot_err_mat_hap /= n_indiv
 tot_err_mask_pat_hap /= n_indiv
 tot_err_mask_mat_hap /= n_indiv
-          
+
 if not options.full:
     if options.header:
         print('"input file"',

@@ -33,7 +33,7 @@
 #
 #  A simple script that generate various instances using 'pedigree-generator.py' and
 #  'hc-generator.py' with various parameters.
-#  
+#
 #  Useful for 'serial' experimentations.
 #
 ##########

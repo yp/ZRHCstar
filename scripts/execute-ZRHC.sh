@@ -33,7 +33,7 @@
 #
 #  A simple script that execute ZRHC in the 'create-read' mode on
 #  every genotyped pedigree of the current directory.
-#  
+#
 #  Useful for 'serial' experimentations.
 #
 ##########
