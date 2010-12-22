@@ -49,5 +49,5 @@ LANG=C
 
 for pedigree in ${pedigrees}; do
     echo "`date`  --  Executing on ${pedigree}"
-    nice time -f "%U %s %E %x %M %C" -o ${pedigree/#gen-/time-} ${ZRHC_exe} -3 -p ${pedigree} -h ${pedigree/#gen-/hap-} -c "${SAT_cmd}"
+    nice time -f "%U %S %E %x %M %C" -o ${pedigree/#gen-/time-} ${ZRHC_exe} -3 -p ${pedigree} -h ${pedigree/#gen-/hap-} -c "${SAT_cmd}"
 done
