@@ -143,10 +143,15 @@ while len(pedigree) < ped_size:
     new_gen= False
     children= set()
     parents= set()
+    last_father= -1
+    last_mother= -1
     while len(pedigree) < ped_size and not new_gen:
         rnd_choice= random.randint(1, 3)
         if len(pedigree) == ped_size - 1:
-            rnd_choice= 3
+            if len(males) > 0 and len(females) > 0:
+                rnd_choice= 3
+            else:
+                rnd_choice= 4
         if rnd_choice == 1 and len(males) == 0:
             rnd_choice= 2
         if rnd_choice == 2 and len(females) == 0:
@@ -165,12 +170,18 @@ while len(pedigree) < ped_size:
             father= create_founder(1, pedigree, fathers, mothers, genders)
             mother= extract_or_create(females, 2,
                                       pedigree, fathers, mothers, genders)
-        else:
+        elif rnd_choice == 3:
             father= extract_or_create(males, 1,
                                       pedigree, fathers, mothers, genders)
             mother= extract_or_create(females, 2,
                                       pedigree, fathers, mothers, genders)
+        else:
+            father= last_father
+            mother= last_mother
         logging.debug("Current parents: father= %4d  -  mother= %4d", father, mother)
+
+        last_father= father
+        last_mother= mother
         
         p_child = 1.0
         while len(pedigree) < ped_size and random.random() < p_child:
