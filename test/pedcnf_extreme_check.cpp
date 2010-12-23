@@ -100,9 +100,10 @@ TEST(zrhc, ext_sattohc) {
   zrhcstar_t zrhcstar;
 
   zrhcstar_t::pedigree_t ped;
-  pedcnf_t cnf;
+  pedcnf_t* cnf;
   const bool is_sat=
 	 zrhcstar.compute_HC_from_SAT_results(is_ped, is_res, ped, cnf);
+  delete cnf;
 
   ASSERT_TRUE( is_sat );
   zrhcstar_t::pedigree_t::pedigree_t& fam= ped.families().front();

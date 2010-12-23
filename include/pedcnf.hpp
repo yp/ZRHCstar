@@ -129,6 +129,9 @@ private:
 
 public:
 
+  virtual ~pedcnf_t() {
+  };
+
   int get_h(const size_t i, const size_t l);
 
   int get_w(const size_t i, const size_t l);
@@ -189,17 +192,21 @@ public:
 	 return _clauses;
   };
 
+  virtual size_t no_of_clauses() const {
+	 return _clauses.size();
+  };
+
   void add_clause(const clause_t& clause) {
 	 _clauses.insert(clause);
   };
 
-  bool is_satisfying_assignment() const;
+  virtual bool is_satisfying_assignment() const;
 
-  std::ostream& clauses_to_dimacs_format(std::ostream& out) const;
-  std::ostream& clauses_to_dimacs_format(std::ostream& out,
-													  const std::string& note) const;
-  std::ostream& clauses_to_dimacs_format(std::ostream& out,
-													  const std::vector< std::string >& notes) const;
+  virtual std::ostream& clauses_to_dimacs_format(std::ostream& out) const;
+  virtual std::ostream& clauses_to_dimacs_format(std::ostream& out,
+																 const std::string& note) const;
+  virtual std::ostream& clauses_to_dimacs_format(std::ostream& out,
+																 const std::vector< std::string >& notes) const;
 
   std::string clauses_to_dimacs_format() const {
 	 std::ostringstream out;

@@ -92,6 +92,11 @@ protected:
 		 "%%INPUT%% and %%OUTPUT%% are markers used to represent the input and the output file "
 		 "of the solver and they are automatically substituted by the program into the "
 		 "corresponding filenames.")
+		("generate-XORs,x", po::bool_switch()->default_value(false),
+		 "Use also xor-clauses for the description of the SAT instance. "
+		 "WARNING: The SAT solver **MUST** be able to understand rows such as "
+		 "'x1 2 -3 0' that corresponds to the formula "
+		 "'var1 XOR var2 XOR NOT var3'.")
 		("compress,z", po::bool_switch()->default_value(false),
 		 "Use compressed input and output files.")
 		("compress-input", po::bool_switch()->default_value(false),
@@ -140,7 +145,13 @@ protected:
 		vm["compress"].as<bool>() ||
 		vm["compress-output"].as<bool>();
 
-	 zrhcstar_t zrhcstar;
+	 zrhcstar_t zrhcstar(vm["generate-XORs"].as<bool>());
+
+	 if (vm["generate-XORs"].as<bool>()) {
+		INFO("Use of XOR-clauses allowed.");
+	 } else {
+		INFO("Use of XOR-clauses NOT allowed.");
+	 }
 
 // Dispatch the work depending on the program parameters
 	 if (vm["create"].as<bool>()) {
@@ -204,7 +215,7 @@ protected:
 			  << vm["pedigree"].as<string>() << "' by direct invocation of the SAT solver...");
 		string sat_name;
 		zrhcstar_t::pedigree_t ped;
-		pedcnf_t cnf;
+		pedcnf_t* cnf;
 // Block for reading the pedigree and writing the SAT instance
 // The block is needed to close the SAT instance stream before executing
 // the solver
@@ -268,6 +279,7 @@ protected:
 				DEBUG("Temporary files removed.");
 			 }
 		  }
+		  delete cnf;
 
 		  if (is_zrhc) {
 			 INFO("Zero-Recombinant Haplotype Configuration successfully "

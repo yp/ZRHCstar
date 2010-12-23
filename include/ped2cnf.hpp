@@ -41,6 +41,7 @@
 #include "expr_tree.hpp"
 #include "utility.hpp"
 #include "pedcnf.hpp"
+#include "anf_constraints.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -49,10 +50,6 @@
 
 #include <boost/foreach.hpp>
 
-
-void
-add_anf_constraint(const expr_tree_node& constraint,
-						 pedcnf_t& cnf);
 
 
 
@@ -65,10 +62,11 @@ template <
   typename T_GENOTYPE,
   typename T_HAPLOTYPE,
   typename T_PHENOTYPE,
-  typename T_ID
+  typename T_ID,
+  typename T_PEDCNF
   >
 class ped2cnf_conv_t:
-  public log_able_t< pedcnf_t >,
+  public log_able_t< T_PEDCNF >,
   public std::unary_function< basic_pedigree_t<T_GENOTYPE,
 															  T_HAPLOTYPE,
 															  T_PHENOTYPE,
@@ -107,7 +105,7 @@ private:
 	 }
   }
 
-  void add_constraint(pedcnf_t& cnf,
+  void add_constraint(T_PEDCNF& cnf,
 							 const g& parent_g,
 							 const g& individual_g,
 							 const size_t locus,
@@ -167,17 +165,17 @@ private:
 		if (constraint.children.size() == 1) {
 		  if (constant == 0) {
 			 constraint.kind= EXPR_OP_NOT;
-			 add_anf_constraint(constraint, cnf);
+			 add_anf_constraint<T_PEDCNF>(constraint, cnf);
 		  } else {
-			 add_anf_constraint(constraint.children.front(), cnf);
+			 add_anf_constraint<T_PEDCNF>(constraint.children.front(), cnf);
 		  }
 		} else {
 		  if (constant == 0) {
 			 expr_operator_t new_constraint(EXPR_OP_NOT);
 			 new_constraint.children.push_back(new expr_operator_t(constraint));
-			 add_anf_constraint(new_constraint, cnf);
+			 add_anf_constraint<T_PEDCNF>(new_constraint, cnf);
 		  } else {
-			 add_anf_constraint(constraint, cnf);
+			 add_anf_constraint<T_PEDCNF>(constraint, cnf);
 		  }
 		}
 	 }
@@ -185,8 +183,9 @@ private:
 
 public:
 
-  pedcnf_t convert(const pedigree_t& ped) {
-	 pedcnf_t cnf;
+  T_PEDCNF* convert(const pedigree_t& ped) {
+	 T_PEDCNF* pcnf= new T_PEDCNF;
+	 T_PEDCNF& cnf= *pcnf;
 	 BOOST_FOREACH( const individual_t& ind,
 						 ped.individuals() ) {
 		L_TRACE("Considering individual " << ind.progr_id());
@@ -219,31 +218,10 @@ public:
 		  }
 		}
 	 }
-	 if (logger()->isDebugEnabled()) {
-		L_DEBUG("SAT variables (" << std::setw(4) << cnf.vars().size() << ")");
-		if (logger()->isTraceEnabled()) {
-		  size_t i= 1;
-		  for (pedcnf_t::varvec_t::const_iterator it= cnf.vars().begin();
-				 it != cnf.vars().end();
-				 ++it, ++i) {
-			 L_TRACE(std::setw(4) << i << ")  " << *it);
-		  }
-		}
-		L_DEBUG("SAT clauses   (" << std::setw(4) << cnf.clauses().size() << ")");
-		if (logger()->isTraceEnabled()) {
-		  size_t i= 0;
-		  for (pedcnf_t::clauses_t::const_iterator it= cnf.clauses().begin();
-				 it != cnf.clauses().end();
-				 ++it, ++i) {
-			 L_TRACE(std::setw(4) << i << ")  " << tostr(*it));
-		  }
-		}
-	 } else {
-		L_INFO("The SAT instance is composed by " <<
-				 std::setw(8) << cnf.vars().size() << " variables and " <<
-				 std::setw(8) << cnf.clauses().size() << " clauses");
-	 }
-	 return cnf;
+	 L_INFO("The SAT instance is composed by " <<
+			  std::setw(8) << cnf.vars().size() << " variables and " <<
+			  std::setw(8) << cnf.no_of_clauses() << " clauses");
+	 return pcnf;
   };
 };
 
@@ -253,14 +231,28 @@ template <
   typename T_PHENOTYPE,
   typename T_ID
 >
-pedcnf_t
+pedcnf_t*
 ped2cnf(const basic_pedigree_t<T_GENOTYPE,
 						T_HAPLOTYPE,
 						T_PHENOTYPE,
 						T_ID>& ped) {
-  ped2cnf_conv_t<T_GENOTYPE, T_HAPLOTYPE, T_PHENOTYPE, T_ID> conv;
-  pedcnf_t cnf= conv.convert(ped);
-  return cnf;
+  ped2cnf_conv_t<T_GENOTYPE, T_HAPLOTYPE, T_PHENOTYPE, T_ID, pedcnf_t> conv;
+  return conv.convert(ped);
+}
+
+template <
+  typename T_GENOTYPE,
+  typename T_HAPLOTYPE,
+  typename T_PHENOTYPE,
+  typename T_ID
+>
+pedcnf_ext_t*
+ped2cnf_ext(const basic_pedigree_t<T_GENOTYPE,
+											  T_HAPLOTYPE,
+											  T_PHENOTYPE,
+											  T_ID>& ped) {
+  ped2cnf_conv_t<T_GENOTYPE, T_HAPLOTYPE, T_PHENOTYPE, T_ID, pedcnf_ext_t> conv;
+  return conv.convert(ped);
 }
 
 

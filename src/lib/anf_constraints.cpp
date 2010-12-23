@@ -26,13 +26,13 @@
  **/
 /**
  *
- * ped2cnf.cpp
+ * anf_constraints.cpp
  *
- * Functions to convert a pedigree into a SAT instance
+ * Functions that convert a constraint to a set of clauses
  *
  **/
 
-#include "ped2cnf.hpp"
+#include "anf_constraints.hpp"
 
 static void
 assign(pedcnf_t& cnf, std::vector<int>& v,
@@ -144,7 +144,7 @@ xor2cnf(const expr_operator_t& constraint,
 }
 
 static void
-add_anf_constraint(const expr_operator_t& constraint,
+_add_anf_constraint(const expr_operator_t& constraint,
 						 pedcnf_t& cnf) {
   if (constraint.kind == EXPR_OP_NOT) {
 	 not2cnf(constraint, cnf);
@@ -157,7 +157,7 @@ add_anf_constraint(const expr_operator_t& constraint,
 };
 
 static void
-add_anf_constraint(const expr_variable_t& constraint,
+_add_anf_constraint(const expr_variable_t& constraint,
 						 pedcnf_t& cnf) {
   const int var= constraint.variable;
   MY_ASSERT_DBG( var>=0 );
@@ -166,15 +166,82 @@ add_anf_constraint(const expr_variable_t& constraint,
   cnf.add_clause(clause);
 };
 
+template <>
 void
-add_anf_constraint(const expr_tree_node& constraint,
-						 pedcnf_t& cnf) {
+add_anf_constraint<pedcnf_t>(const expr_tree_node& constraint,
+									  pedcnf_t& cnf) {
   if (typeid(constraint) == typeid(expr_operator_t)) {
-	 add_anf_constraint(dynamic_cast<const expr_operator_t&>(constraint), cnf);
+	 _add_anf_constraint(dynamic_cast<const expr_operator_t&>(constraint), cnf);
   } else if (typeid(constraint) == typeid(expr_variable_t)) {
-	 add_anf_constraint(dynamic_cast<const expr_variable_t&>(constraint), cnf);
+	 _add_anf_constraint(dynamic_cast<const expr_variable_t&>(constraint), cnf);
   } else {
 	 MY_FAIL;
   }
 };
 
+
+static void
+not2cnf_ext(const expr_operator_t& constraint,
+				pedcnf_ext_t& cnf) {
+  MY_ASSERT_DBG( constraint.children.size()==1 );
+  const expr_tree_node& _child= constraint.children.front();
+  if (typeid(_child) == typeid(expr_operator_t)) {
+	 const expr_operator_t& child= dynamic_cast<const expr_operator_t&>(_child);
+	 MY_ASSERT_DBG( child.kind == EXPR_OP_XOR );
+	 std::vector<int> basic_clause;
+	 get_basic_clause(cnf, child, basic_clause);
+// There was a NOT in the root: change the sign of the first literal
+	 basic_clause[0]= -basic_clause[0];
+	 pedcnf_ext_t::xor_clause_t clause;
+	 std::copy(basic_clause.begin(), basic_clause.end(),
+				  std::inserter(clause, clause.begin()));
+	 cnf.add_xor_clause(clause);
+  } else if (typeid(_child) == typeid(expr_variable_t)) {
+	 int var= dynamic_cast<const expr_variable_t&>(_child).variable;
+	 MY_ASSERT_DBG( var>=0 );
+	 pedcnf_t::clause_t clause;
+	 clause.insert(-var);
+	 cnf.add_clause(clause);
+  } else {
+	 MY_FAIL;
+  }
+}
+
+static void
+xor2cnf_ext(const expr_operator_t& constraint,
+				pedcnf_ext_t& cnf) {
+  MY_ASSERT_DBG( constraint.children.size()>1 );
+  MY_ASSERT_DBG( constraint.kind == EXPR_OP_XOR );
+  std::vector<int> basic_clause;
+  get_basic_clause(cnf, constraint, basic_clause);
+  pedcnf_ext_t::xor_clause_t clause;
+  std::copy(basic_clause.begin(), basic_clause.end(),
+				std::inserter(clause, clause.begin()));
+  cnf.add_xor_clause(clause);
+}
+
+static void
+_add_anf_constraint_ext(const expr_operator_t& constraint,
+								pedcnf_ext_t& cnf) {
+  if (constraint.kind == EXPR_OP_NOT) {
+	 not2cnf_ext(constraint, cnf);
+  } else if (constraint.kind == EXPR_OP_XOR) {
+	 xor2cnf_ext(constraint, cnf);
+  } else {
+// Should not arrive here
+	 MY_FAIL;
+  }
+};
+
+template <>
+void
+add_anf_constraint<pedcnf_ext_t>(const expr_tree_node& constraint,
+											pedcnf_ext_t& cnf) {
+  if (typeid(constraint) == typeid(expr_operator_t)) {
+	 _add_anf_constraint_ext(dynamic_cast<const expr_operator_t&>(constraint), cnf);
+  } else if (typeid(constraint) == typeid(expr_variable_t)) {
+	 _add_anf_constraint(dynamic_cast<const expr_variable_t&>(constraint), cnf);
+  } else {
+	 MY_FAIL;
+  }
+};
