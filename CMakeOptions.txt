@@ -1,0 +1,10 @@
+# Yuri Pirola. Copyright (C) 2010. GPLv3.
+
+# Declaration of main options.
+# Included into the main CMakeLists.txt.
+
+option(ENABLE_TESTS
+  "Enable unit tests (effective only in DEBUG builds and if Google Test has been found)."
+  OFF
+)
+
