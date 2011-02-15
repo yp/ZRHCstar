@@ -121,6 +121,7 @@ using namespace std;
   "0	4	0	0	1	phenotype	2|1	1|2	1|1	1|1	2|2\n" \
   "0	5	4	3	1	phenotype	1|2	2|1	1|1	1|1	2|1\n"
 
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 TEST(zrhc, pedtocnf) {
   string pedigree(PEDIGREE_STR);
   string sat_instance(SAT_INSTANCE_STR);
@@ -158,3 +159,4 @@ TEST(zrhc, sattohc) {
   ASSERT_EQ( hc, os.str());
 
 }
+#endif

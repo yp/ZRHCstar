@@ -66,6 +66,38 @@ foreach (CONFIGINPUT ${CONFIGINPUTS})
     configure_file ("${CONFIGINPUT}" "${CONFIGOUTPUT}")
 endforeach (CONFIGINPUT ${CONFIGINPUTS})
 
+
+
+if (INTEGRATE_SAT_SOLVER)
+
+  message(STATUS "SAT solver integrated.")
+  remove_definitions(-DNO_INTERNAL_SAT_SOLVER)
+  add_definitions(-DINTERNAL_SAT_SOLVER)
+  if (DISABLE_EXTERNAL_SAT_SOLVERS)
+    message(STATUS "External SAT solvers *CANNOT* be used.")
+    add_definitions(-DONLY_INTERNAL_SAT_SOLVER)
+  else()
+    message(STATUS "External SAT solvers can still be used.")
+    remove_definitions(-DONLY_INTERNAL_SAT_SOLVER)
+  endif()
+
+  add_subdirectory(solver)
+  include_directories("solver/${sat_INCLUDE}")
+  add_definitions(-DSAT_SOLVER=${SAT_SOLVER})
+  foreach(DEFINITION ${sat_DEFINITIONS})
+    add_definitions(-D${DEFINITION})
+  endforeach()
+
+else()
+
+  message(STATUS "SAT solver *NOT* integrated.")
+  set(DISABLE_EXTERNAL_SAT_SOLVERS "OFF")
+  add_definitions(-DNO_INTERNAL_SAT_SOLVER)
+  remove_definitions(-DINTERNAL_SAT_SOLVER)
+  remove_definitions(-DONLY_INTERNAL_SAT_SOLVER)
+
+endif()
+
 #
 # Add Build Targets
 #

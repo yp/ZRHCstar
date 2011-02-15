@@ -8,3 +8,13 @@ option(ENABLE_TESTS
   OFF
 )
 
+option(INTEGRATE_SAT_SOLVER
+  "Integrate a SAT solver into ZRHCstar."
+  ON
+)
+
+option(DISABLE_EXTERNAL_SAT_SOLVERS
+  "Disable the ability to use an external SAT solver (saves memory)."
+  ON
+)
+

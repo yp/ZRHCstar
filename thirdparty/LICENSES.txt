@@ -1,4 +1,8 @@
 == ACKNOWLEDGEMENTS ==
 
-The basic project template is based on: "cpp-project-template" by Michael Aaron Safyan (http://code.google.com/p/cpp-project-template/)
+The basic project template is based on: "cpp-project-template" by
+Michael Aaron Safyan (http://code.google.com/p/cpp-project-template/)
 
+The project incorporates "CryptoMiniSat" version 2.7.1 by Mate Soos
+(http://gitorious.org/cryptominisat) which is distributed under the
+GPL license version 3.

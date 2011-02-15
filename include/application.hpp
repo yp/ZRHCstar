@@ -59,6 +59,14 @@ protected:
 // Function used to check that at least one of 'opt1' or 'opt2' are
 // specified.
   void mode_options(const po::variables_map& vm,
+						  const char* opt) const {
+	 TRACE("Checking required option '" << opt <<
+			 "'.");
+	 if (!vm[opt].as<bool>())
+		throw std::logic_error(std::string("Option '")
+									  + opt + "' must be specified.");
+  }
+  void mode_options(const po::variables_map& vm,
 						  const char* opt1,
 						  const char* opt2) const {
 	 TRACE("Checking alternative options '" << opt1 <<
@@ -76,6 +84,21 @@ protected:
 	 if (!vm[opt1].as<bool>() && !vm[opt2].as<bool>() && !vm[opt3].as<bool>())
 		throw std::logic_error(std::string("At least one of the options '")
 									  + opt1 + "', '" + opt2 + "', or '" + opt3 +
+									  "' must be specified.");
+  }
+  void mode_options(const po::variables_map& vm,
+						  const char* opt1,
+						  const char* opt2,
+						  const char* opt3,
+						  const char* opt4) const {
+	 TRACE("Checking alternative options '" << opt1 <<
+			 "', '" << opt2 << "', '" << opt3 << "', and'" <<
+			 opt4 << "'.");
+	 if (!vm[opt1].as<bool>() && !vm[opt2].as<bool>()
+		  && !vm[opt3].as<bool>() && !vm[opt4].as<bool>())
+		throw std::logic_error(std::string("At least one of the options '")
+									  + opt1 + "', '" + opt2 + "', '" + opt3 +
+									  ", or '" + opt4 +
 									  "' must be specified.");
   }
 // Function used to check that 'opt1' and 'opt2' are not specified
