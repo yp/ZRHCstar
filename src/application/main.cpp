@@ -219,7 +219,7 @@ protected:
 		  get_ifstream(vm["pedigree"].as<string>(), in_compress);
 		file_utility::pistream res_is=
 		  file_utility::get_file_utility().
-		  get_ifstream(vm["result"].as<string>(), in_compress);
+		  get_ifstream(vm["result"].as<string>(), false); // The SAT result is always not compressed
 		file_utility::postream hap_os=
 		  file_utility::get_file_utility().
 		  get_ofstream(vm["haplotypes"].as<string>(), out_compress);
