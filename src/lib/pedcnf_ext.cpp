@@ -39,6 +39,7 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 bool
 pedcnf_ext_t::is_satisfying_assignment() const {
   L_DEBUG("Checking if value assignment satisfies the or- and xor-clauses...");
@@ -102,4 +103,17 @@ pedcnf_ext_t::clauses_to_dimacs_format(std::ostream& out,
 	 out << "x" << *it << std::endl;
   }
   return out;
+};
+
+#endif // ONLY_INTERNAL_SAT_SOLVER
+
+void
+pedcnf_ext_t::add_xor_clause(const xor_clause_t& clause) {
+#ifndef ONLY_INTERNAL_SAT_SOLVER
+  _xor_clauses.insert(clause);
+#endif
+#ifdef INTERNAL_SAT_SOLVER
+  _solver.add_xor_clause(clause);
+#endif
+  ++_no_of_xor_clauses;
 };

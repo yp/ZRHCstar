@@ -52,12 +52,18 @@ private:
 public:
 
   typedef std::set<int> xor_clause_t;
+
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   typedef std::set< xor_clause_t > xor_clauses_t;
+#endif // ONLY_INTERNAL_SAT_SOLVER
 
 // Data members
 private:
 
+  size_t _no_of_xor_clauses;
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   xor_clauses_t _xor_clauses;
+#endif // ONLY_INTERNAL_SAT_SOLVER
 
 public:
 
@@ -68,15 +74,20 @@ private:
 
 public:
 
+  pedcnf_ext_t()
+		:_no_of_xor_clauses(0)
+  {};
+
 // Override functions
 
   virtual ~pedcnf_ext_t() {
   };
 
   virtual size_t no_of_clauses() const {
-	 return clauses().size() + _xor_clauses.size();
+	 return pedcnf_t::no_of_clauses() + _no_of_xor_clauses;
   };
 
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   virtual bool is_satisfying_assignment() const;
 
   virtual std::ostream& clauses_to_dimacs_format(std::ostream& out,
@@ -88,9 +99,9 @@ public:
 	 return _xor_clauses;
   };
 
-  void add_xor_clause(const xor_clause_t& clause) {
-	 _xor_clauses.insert(clause);
-  };
+#endif // ONLY_INTERNAL_SAT_SOLVER
+
+  void add_xor_clause(const xor_clause_t& clause);
 
 };
 

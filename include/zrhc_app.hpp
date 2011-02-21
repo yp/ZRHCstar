@@ -54,6 +54,8 @@ private:
 
   const bool _extended;
 
+public:
+
   void prepare_pedigree_and_sat(std::istream& ped_is,
 										  pedigree_t& mped,
 										  pedcnf_t*& cnf) const {
@@ -109,6 +111,7 @@ public:
   };
 
 
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   void create_SAT_instance_from_pedigree(std::istream& ped_is,
 													  std::ostream& sat_os,
 													  const std::vector<std::string>& headers) const {
@@ -146,22 +149,11 @@ public:
 											  pedcnf_t*& cnf) const {
 // Open the result file and read the assignment
 	 const bool is_sat= read_SAT_results(*cnf, res_is);
-
 	 if (is_sat) {
 		L_INFO("The pedigree can be realized by a zero-recombinant haplotype "
 			  "configuration.");
-		pedigree_t::pedigree_t& family= ped.families().front();
-// Compute the actual haplotype configuration
-		compute_ZRHC_from_SAT(family, *cnf);
-// Check the haplotype configuration
-		const bool ok=
-		  family.is_completely_haplotyped() &&
-		  family.is_consistent() &&
-		  family.is_zero_recombinant();
-		if (ok) {
-		  L_INFO("The computed haplotype configuration is valid.");
-		} else {
-		  L_ERROR("The computed haplotype configuration is not valid.");
+		const bool ok= compute_HC_from_model(ped, cnf);
+		if (!ok) {
 		  MY_FAIL;
 		}
 	 } else {
@@ -170,7 +162,40 @@ public:
 // Do nothing
 	 }
 	 return is_sat;
+  }
+#endif // not defined ONLY_INTERNAL_SAT_SOLVER
+
+  bool compute_HC_from_model(pedigree_t& ped,
+									  pedcnf_t*& cnf) const {
+	 pedigree_t::pedigree_t& family= ped.families().front();
+// Compute the actual haplotype configuration
+	 compute_ZRHC_from_SAT(family, *cnf);
+// Check the haplotype configuration
+	 const bool ok=
+		family.is_completely_haplotyped() &&
+		family.is_consistent() &&
+		family.is_zero_recombinant();
+	 if (ok) {
+		L_INFO("The computed haplotype configuration is valid.");
+	 } else {
+		L_ERROR("The computed haplotype configuration is not valid.");
+	 }
+	 return ok;
   };
+
+  bool compute_HC_from_model_and_save(pedigree_t& ped,
+												  pedcnf_t*& cnf,
+												  std::ostream& hap_os) const {
+	 const bool ok= compute_HC_from_model(ped, cnf);
+	 if (ok) {
+// Output the haplotype configuration
+		save_ZRHC(ped, hap_os);
+	 }
+	 return ok;
+  };
+
+
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 
   bool compute_HC_from_SAT_results(std::istream& ped_is,
 											  std::istream& res_is,
@@ -202,5 +227,6 @@ public:
 	 return is_sat;
   }
 
+#endif // not defined ONLY_INTERNAL_SAT_SOLVER
 
 };

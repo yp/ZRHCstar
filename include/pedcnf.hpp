@@ -40,6 +40,9 @@
 #include "log.hpp"
 #include "utility.hpp"
 
+// Include the SAT solver interface (if asked to do so)
+#include "sat_solver_interface.hpp"
+
 #include <map>
 #include <set>
 #include <vector>
@@ -95,7 +98,9 @@ public:
   typedef std::vector<pedvar_t> varvec_t;
   typedef std::vector<bool> valvec_t;
   typedef std::set<int> clause_t;
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   typedef std::set< clause_t > clauses_t;
+#endif // ONLY_INTERNAL_SAT_SOLVER
 
 // Data members
 private:
@@ -108,7 +113,19 @@ private:
   varvec_t _vars;
   valvec_t _vals;
 
+  size_t _no_of_clauses;
+
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   clauses_t _clauses;
+#endif // ONLY_INTERNAL_SAT_SOLVER
+
+
+#ifdef INTERNAL_SAT_SOLVER
+
+protected:
+  SAT_solver_iface_t _solver;
+
+#endif // INTERNAL_SAT_SOLVER
 
 public:
 
@@ -128,6 +145,10 @@ private:
 
 
 public:
+
+  pedcnf_t()
+		:_no_of_clauses(0)
+  {};
 
   virtual ~pedcnf_t() {
   };
@@ -188,18 +209,19 @@ public:
 	 return _vals;
   };
 
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   const clauses_t& clauses() const {
 	 return _clauses;
   };
+#endif // ONLY_INTERNAL_SAT_SOLVER
 
   virtual size_t no_of_clauses() const {
-	 return _clauses.size();
+	 return _no_of_clauses;
   };
 
-  void add_clause(const clause_t& clause) {
-	 _clauses.insert(clause);
-  };
+  void add_clause(const clause_t& clause);
 
+#ifndef ONLY_INTERNAL_SAT_SOLVER
   virtual bool is_satisfying_assignment() const;
 
   virtual std::ostream& clauses_to_dimacs_format(std::ostream& out) const;
@@ -223,11 +245,26 @@ public:
 	 clauses_to_dimacs_format(out, notes);
 	 return out.str();
   };
+#endif // ONLY_INTERNAL_SAT_SOLVER
 
 // Read the assignment from a file like the following one:
 // SAT/UNSAT
 // 1 -2 3 4 0
   bool assignment_from_minisat_format(std::istream& in);
+
+
+#ifdef INTERNAL_SAT_SOLVER
+  bool solve() {
+	 const bool ret= _solver.solve();
+	 if (ret) {
+		for (Var var = 0; var != _solver.no_of_vars(); var++) {
+		  _vals[var]= _solver.model(var);
+		}
+	 } else {
+	 }
+	 return ret;
+  };
+#endif // INTERNAL_SAT_SOLVER
 
 };
 
