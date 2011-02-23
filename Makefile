@@ -1,15 +1,15 @@
 ##############################################################
 #               CMake Project Wrapper Makefile               #
 ############################################################## 
-DEFAULT_STATUS := debug
+DEFAULT_STATUS := Debug
 
 ifndef STATUS
 STATUS:=__undefined__status__
 endif
 
 
-ifneq ($(STATUS), debug)
-ifneq ($(STATUS), release)
+ifneq ($(STATUS), Debug)
+ifneq ($(STATUS), Release)
 
 $(info No status specified. Using the default status "${DEFAULT_STATUS}")
 

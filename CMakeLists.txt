@@ -14,6 +14,7 @@ set (APPLICATION_VENDOR_NAME "Parco Tecnologico Padano")
 set (APPLICATION_VENDOR_URL "www.tecnoparco.org")
 set (APPLICATION_ID "${APPLICATION_VENDOR_ID}.${PROJECT_NAME}")
 
+include(CMakeOptions.txt)
 
 #
 # Debugging Options
@@ -39,7 +40,7 @@ set (CMAKE_MODULE_PATH "${MAINFOLDER}/tools/share/cmake")
 include_directories("${MAINFOLDER}/include")
 
 #
-# Locate Project Prerequisites 
+# Locate Project Prerequisites
 #
 set (Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0")
 find_package (Boost COMPONENTS "filesystem" "system" "date_time" "program_options" "iostreams" REQUIRED)
@@ -49,8 +50,9 @@ find_package (Log4Cxx REQUIRED)
 include_directories(${Log4Cxx_INCLUDE_DIRS})
 link_directories(${Log4Cxx_LIBRARY_DIRS})
 
-add_definitions("-std=c++0x -Wall")
+set (CMAKE_CXX_FLAGS "-std=c++0x -Wall ${CMAKE_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 ${CMAKE_CXX_FLAGS_DEBUG}")
+set (CMAKE_CXX_FLAGS_RELEASE "-mtune=native -fomit-frame-pointer ${CMAKE_CXX_FLAGS_RELEASE}")
 
 include(ExtractSourceVersionFromGit)
 set (APPLICATION_VERSION_STRING "${APPLICATION_SOURCE_VERSION}") # See the version from the 'git' repositories
@@ -58,23 +60,43 @@ set (APPLICATION_VERSION_STRING "${APPLICATION_SOURCE_VERSION}") # See the versi
 #
 # Configure Files
 #
-file (GLOB_RECURSE CONFIGINPUTS1 include/*.in.h.cmake)
-file (GLOB_RECURSE CONFIGINPUTS2 include/*.h.in.cmake)
-file (GLOB_RECURSE CONFIGINPUTS3 src/*.in.h.cmake)
-file (GLOB_RECURSE CONFIGINPUTS4 src/*.h.in.cmake)
-file (GLOB_RECURSE CONFIGINPUTS5 test/*.in.h.cmake)
-file (GLOB_RECURSE CONFIGINPUTS6 test/*.h.in.cmake)
-list (APPEND CONFIGINPUTS "${CONFIGINPUTS1}")
-list (APPEND CONFIGINPUTS "${CONFIGINPUTS2}")
-list (APPEND CONFIGINPUTS "${CONFIGINPUTS3}")
-list (APPEND CONFIGINPUTS "${CONFIGINPUTS4}")
-list (APPEND CONFIGINPUTS "${CONFIGINPUTS5}")
-list (APPEND CONFIGINPUTS "${CONFIGINPUTS6}")
+file (GLOB_RECURSE CONFIGINPUTS include/*.h.in.cmake)
 foreach (CONFIGINPUT ${CONFIGINPUTS})
-    string (REPLACE ".in.h.cmake" ".h" CONFIGOUTPUT1 "${CONFIGINPUT}")
-    string (REPLACE ".h.in.cmake" ".h" CONFIGOUTPUT2 "${CONFIGOUTPUT1}")
-    configure_file ("${CONFIGINPUT}" "${CONFIGOUTPUT2}")
+    string (REPLACE ".h.in.cmake" ".h" CONFIGOUTPUT "${CONFIGINPUT}")
+    configure_file ("${CONFIGINPUT}" "${CONFIGOUTPUT}")
 endforeach (CONFIGINPUT ${CONFIGINPUTS})
+
+
+
+if (INTEGRATE_SAT_SOLVER)
+
+  message(STATUS "SAT solver integrated.")
+  remove_definitions(-DNO_INTERNAL_SAT_SOLVER)
+  add_definitions(-DINTERNAL_SAT_SOLVER)
+  if (DISABLE_EXTERNAL_SAT_SOLVERS)
+    message(STATUS "External SAT solvers *CANNOT* be used.")
+    add_definitions(-DONLY_INTERNAL_SAT_SOLVER)
+  else()
+    message(STATUS "External SAT solvers can still be used.")
+    remove_definitions(-DONLY_INTERNAL_SAT_SOLVER)
+  endif()
+
+  add_subdirectory(solver)
+  include_directories("solver/${sat_INCLUDE}")
+  add_definitions(-DSAT_SOLVER=${SAT_SOLVER})
+  foreach(DEFINITION ${sat_DEFINITIONS})
+    add_definitions(-D${DEFINITION})
+  endforeach()
+
+else()
+
+  message(STATUS "SAT solver *NOT* integrated.")
+  set(DISABLE_EXTERNAL_SAT_SOLVERS "OFF")
+  add_definitions(-DNO_INTERNAL_SAT_SOLVER)
+  remove_definitions(-DINTERNAL_SAT_SOLVER)
+  remove_definitions(-DONLY_INTERNAL_SAT_SOLVER)
+
+endif()
 
 #
 # Add Build Targets

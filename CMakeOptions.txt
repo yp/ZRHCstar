@@ -1,0 +1,20 @@
+# Yuri Pirola. Copyright (C) 2010. GPLv3.
+
+# Declaration of main options.
+# Included into the main CMakeLists.txt.
+
+option(ENABLE_TESTS
+  "Enable unit tests (effective only in DEBUG builds and if Google Test has been found)."
+  OFF
+)
+
+option(INTEGRATE_SAT_SOLVER
+  "Integrate a SAT solver into ZRHCstar."
+  ON
+)
+
+option(DISABLE_EXTERNAL_SAT_SOLVERS
+  "Disable the ability to use an external SAT solver (saves memory)."
+  ON
+)
+

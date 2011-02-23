@@ -126,6 +126,9 @@ pedcnf_t::get_dummy(const int v1, const int v2) const {
   return get_var(_dummy, v1, v2);
 };
 
+
+#ifndef ONLY_INTERNAL_SAT_SOLVER
+
 bool
 pedcnf_t::is_satisfying_assignment() const {
   L_DEBUG("Checking if value assignment satisfies the clauses...");
@@ -192,6 +195,8 @@ pedcnf_t::clauses_to_dimacs_format(std::ostream& out,
   return out;
 };
 
+#endif // ONLY_INTERNAL_SAT_SOLVER
+
 
 // Read the assignment from a file like the following one:
 // SAT/UNSAT
@@ -216,7 +221,9 @@ pedcnf_t::assignment_from_minisat_format(std::istream& in) {
 		_vals[(size_t)abs(value)-1]= (value>0);
 	 }
 	 MY_ASSERT( ! (is >> value) ); // zero must be the last element
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 	 MY_ASSERT_DBG( is_satisfying_assignment() );
+#endif // ONLY_INTERNAL_SAT_SOLVER
 	 return true;
   } else {
 	 MY_FAIL;
@@ -234,4 +241,15 @@ operator<<(std::ostream& out, const pedcnf_t::clause_t& clause) {
   }
   out << "     0";
   return out;
+};
+
+void
+pedcnf_t::add_clause(const clause_t& clause) {
+#ifndef ONLY_INTERNAL_SAT_SOLVER
+  _clauses.insert(clause);
+#endif
+#ifdef INTERNAL_SAT_SOLVER
+  _solver.add_clause(clause);
+#endif
+  ++_no_of_clauses;
 };

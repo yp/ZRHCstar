@@ -54,7 +54,8 @@ class zrhcstar_application_t: public application_t {
 public:
 
   zrhcstar_application_t()
-		:application_t(APPLICATION_CODENAME " " APPLICATION_VERSION_STRING)
+		:application_t(APPLICATION_CODENAME " " APPLICATION_VERSION_STRING
+							" " BOOST_PP_STRINGIZE(SAT_SOLVER))
   {}
 
 private:
@@ -68,12 +69,18 @@ protected:
 	 desc.add_options()
 		("help,?", po::bool_switch(),
 		 "Produce (this) help message.")
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 		("create,1", po::bool_switch(),
 		 "Create the SAT instance from the pedigree file.")
 		("read,2", po::bool_switch(),
 		 "Read the results produced by the SAT solver.")
 		("create-read,3", po::bool_switch(),
 		 "Create the SAT instance from the pedigree file, execute the SAT solver, and read the results.")
+#endif // ONLY_INTERNAL_SAT_SOLVER
+#ifdef INTERNAL_SAT_SOLVER
+		("solve-internal,4", po::bool_switch(),
+		 "Execute the integrated SAT solver.")
+#endif // INTERNAL_SAT_SOLVER
 		("pedigree,p",
 		 po::value< std::string >()->default_value("pedigree.ped"),
 		 "File storing the genotyped pedigree.")
@@ -124,7 +131,16 @@ protected:
 
 // Check parameter values
 	 DEBUG("Checking program parameters...");
+#if defined(NO_INTERNAL_SAT_SOLVER)
 	 mode_options(vm, "create", "read", "create-read");
+#endif
+#if defined(INTERNAL_SAT_SOLVER) && !defined(ONLY_INTERNAL_SAT_SOLVER)
+	 mode_options(vm, "create", "read", "create-read", "solve-internal");
+#endif
+#if defined(ONLY_INTERNAL_SAT_SOLVER)
+	 mode_options(vm, "solve-internal");
+#endif
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 	 conflicting_options(vm, "create", "read");
 	 conflicting_options(vm, "create", "create-read");
 	 conflicting_options(vm, "create-read", "read");
@@ -136,6 +152,16 @@ protected:
 	 option_dependency(vm, "create-read", "pedigree");
 	 option_dependency(vm, "create-read", "haplotypes");
 	 option_dependency(vm, "create-read", "sat-cmdline");
+#endif
+#ifdef INTERNAL_SAT_SOLVER
+#ifndef ONLY_INTERNAL_SAT_SOLVER
+	 conflicting_options(vm, "solve-internal", "create");
+	 conflicting_options(vm, "solve-internal", "read");
+	 conflicting_options(vm, "solve-internal", "create-read");
+#endif
+	 option_dependency(vm, "solve-internal", "pedigree");
+	 option_dependency(vm, "solve-internal", "haplotypes");
+#endif
 	 DEBUG("Check completed.");
 
 	 const bool in_compress=
@@ -154,6 +180,7 @@ protected:
 	 }
 
 // Dispatch the work depending on the program parameters
+#ifndef ONLY_INTERNAL_SAT_SOLVER
 	 if (vm["create"].as<bool>()) {
 //    Creation of the SAT instance
 		INFO("Creation of the SAT instance from the pedigree of file '"
@@ -292,7 +319,52 @@ protected:
 		  }
 		}
 
-	 } else {
+	 } else
+#endif
+#ifdef INTERNAL_SAT_SOLVER
+		if (vm["solve-internal"].as<bool>()) {
+		INFO("Computation of the haplotype configuration from the "
+			  "pedigree of file '"
+			  << vm["pedigree"].as<string>() << "' by using the internal SAT solver...");
+		zrhcstar_t::pedigree_t ped;
+		pedcnf_t* cnf;
+// Block for reading the pedigree and writing the SAT instance
+// The block is needed to close the SAT instance stream before executing
+// the solver
+		{
+		  file_utility::pistream ped_is=
+			 file_utility::get_file_utility().
+			 get_ifstream(vm["pedigree"].as<string>(), in_compress);
+		  zrhcstar.prepare_pedigree_and_sat(*ped_is,
+														ped, cnf);
+		}
+
+// Execute the SAT solver
+		INFO("Execution of the internal SAT solver...");
+		const bool ret_value= cnf->solve();
+// We have to trust the return value
+		DEBUG("The SAT solver returned: '" << ret_value << "'.");
+
+		file_utility::postream hap_os=
+		  file_utility::get_file_utility().
+		  get_ofstream(vm["haplotypes"].as<string>(), out_compress);
+		bool is_zrhc= zrhcstar.compute_HC_from_model_and_save(ped, cnf,
+																				*hap_os);
+		delete cnf;
+
+		if (is_zrhc) {
+		  INFO("Zero-Recombinant Haplotype Configuration successfully "
+				 "computed and saved.");
+		  main_ris= EXIT_SUCCESS;
+		} else {
+		  INFO("No Zero-Recombinant Haplotype Configuration can exist. "
+				 "Exiting without haplotype configuration.");
+		  main_ris= EXIT_NO_ZRHC;
+		}
+
+	 } else
+#endif // INTERNAL_SAT_SOLVER
+	 {
 // We should not arrive here
 		MY_FAIL;
 		throw logic_error(string("Modes have not been recognized."));

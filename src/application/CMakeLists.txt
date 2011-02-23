@@ -9,13 +9,24 @@ file (GLOB_RECURSE project_SRCS
   [A-Za-z0-9]*.hpp
 )
 
-set (project_LIBS ${Boost_LIBRARIES} ${Log4Cxx_LIBRARIES} ${project_base_LIB})
 set (project_BIN ${PROJECT_NAME})
 
-add_executable(${project_BIN} ${project_SRCS} ${project_MOC_SRCS_GENERATED})
+set (project_LIBS
+  ${sat_LIBS}
+  ${Boost_LIBRARIES}
+  ${Log4Cxx_LIBRARIES}
+  ${project_base_LIB}
+)
+
+add_executable(${project_BIN}
+  ${project_SRCS}
+  ${project_MOC_SRCS_GENERATED}
+)
 target_link_libraries(${project_BIN} ${project_LIBS})
-set_target_properties(${project_BIN}
-  PROPERTIES VERSION "${APPLICATION_VERSION_MAJOR}.${APPLICATION_VERSION_MINOR}"
+set_target_properties(
+  ${project_BIN}
+  PROPERTIES
+  VERSION "${APPLICATION_VERSION_STRING}"
   OUTPUT_NAME ${project_BIN}
   CLEAN_DIRECT_OUTPUT 1
   COMPILE_DEFINITIONS_RELEASE NO_DBG_ASSERTIONS
