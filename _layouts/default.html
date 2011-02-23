@@ -5,19 +5,42 @@
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width = 750">
     <link rel="stylesheet" type="text/css" href="css/stylesheet.css" charset="utf-8">
-    <title>{{ page.title }}</title>
+    <link rel="stylesheet" type="text/css" href="css/syntax.css" charset="utf-8">
+    <title>{{ site.title }}</title>
   </head>
-  <body id="intro">
-    <div id="wrapper">
-      <div id="header">
-        <h1>ZRHC-*</h1>
+  <body>
+
+    <div class="page">
+
+      <div class="header">
+        <h1>{{ page.title }}</h1>
       </div>
-      <div id="page_body">
-        <div id="content">
-          {{ content }}
-        </div>
+
+      {% if page.nav %}
+      <div class="pagenav">
+        <ul id="pagenav">
+          {% for nav in page.nav %}
+          <li><a href="{{ nav['link'] }}">{{ nav['name'] }}</a></li>
+          {% endfor %}
+        </ul>
       </div>
+      {% endif %}
+
+      <div class="content">
+        {{ content }}
+      </div>
+
+      <div class="footer">
+        <p id="update_time">Last update: {{ site.time | date: "%b %d, %Y"}}</p>
+      </div>
+
+      <a href="http://github.com/{{ site.github_user }}/{{ site.github_repository }}">
+        <img style="position: absolute; top: 0; right: 0; border: 0;"
+             src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
+             alt="Fork me on GitHub" />
+      </a>
     </div>
-    <a href="http://github.com/AlgoLab/PIntron"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+
+
   </body>
 </html>

@@ -1,10 +1,20 @@
 ---
 layout: default
-title: ZRHCstar
+title: ZRHC-*
+nav:
+  - name: Introduction
+    link: "#introduction"
+  - name: Installation
+    link: "#installation"
+  - name: Usage
+    link: "#usage"
+  - name: File Formats
+    link: "#file_formats"
+  - name: License
+    link: "#license"
+  - name: Acknowledgments
+    link: "#acknowledgments"
+  - name: Contacts
+    link: "#contacts"
 ---
-
-A SAT-based program to compute a zero-recombinant
-haplotype configuration with many missing genotypes
-
-by [Yuri Pirola](http://bimib.disco.unimib.it/index.php/Pirola_Yuri)
-
+{% include docs/README.md %}

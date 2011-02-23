@@ -1,134 +1,126 @@
+---
+layout: nil
+---
+{% include custom_definitions.css %}
+
 html {
-	background: #1e1e1e;
+    background: {{ page_background_color }};
 }
-body {
-/*  background: transparent url("http://macromates.com/images/site/bg_body") repeat-y 50% 0px;*/
-/* font: 0.72em/170% "Lucida Grande", Verdana, Helvetica, sans-serif;*/
-	font: 12px "Lucida Grande", Verdana, Helvetica, sans-serif;
-	margin: 0;
-	padding: 0;
+a {
+    color: {{ link_color }};
 }
-a[href] {
-	color: #525151;
+.page {
+    font: 12px Verdana, Helvetica, sans-serif;
+    line-height: 1.6em;
+    margin: 0;
+    position: absolute;
+    left: 10%;
+    top: 0px;
+    overflow: auto;
+    padding: 0px;
+    background: {{ content_background_color }};
+    color: {{ text_color }};
+    width: 80%;
+    max-width: 80%;
+    max-width: 800px
+}
+.header, .footer {
+    color: {{ title_color }};
+    background: {{ title_background_color }};
+    cursor: pointer;
+    padding: 1em;
+    padding-left: 2em;
+    position: relative;
+    top: 0px;
+    left: 0px;
+    border: 0px;
+    margin: 0px;
+}
+.content h1 {
+    display: none;
+}
+div.content {
+    margin-left: 13em;
+    border-left: 1px solid gray;
+    padding: 2em;
+    padding-right: 3em;
+}
+ul#pagenav {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+div.pagenav {
+    float: left;
+    width: 12em;
+
+    position: relative;
+    top: 2em;
+    left: 0px;
+
+    margin: 0px;
+    padding-left: 0em;
+    padding-right: 0em;
+
+}
+#pagenav a {
+    display: block;
+    width: 11em;
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+    padding-left: 1em;
+    padding-right: 1em;
+    text-decoration: none;
+    border-top: 0.2em solid {{ title_background_color }};
+    border-bottom: 0.2em solid {{ title_background_color }};
+}
+#pagenav a:link, #pagenav a:visited {
+    color: {{ title_color }};
+    background-color: {{ title_background_color }};
+}
+#pagenav a:hover, #pagenav a:active {
+    color: {{ title_background_color }};
+    background-color: {{ title_color }};
+}
+h2 {
+    border-top: 4px solid #E0E0E0;
+    padding-top: 0.5em;
+}
+h2, h3 {
+    margin-top: 2em;
+}
+h4, h5 {
+    margin-top: 1.25em;
+}
+h6 {
+    margin-top: 1em;
+}
+hr {
+    display: none;
+}
+.content pre {
+/*    font-size: 13px;*/
+    border: 1px solid #CCC;
+    margin: 0.5em;
+    padding: 0.5em 0.8em;
+    overflow: auto;
+    line-height: 1.5em;
+    background: #F0F0F0;
+    color: #444;
 }
 
-#wrapper { /* IE workaround */
-	margin: 0 auto;
-	padding: 0;
-	width: 720px;
-}
-html>body #wrapper {
-	margin: 0 auto;
-	padding: 0;
-	width: auto;
-	max-width: 720px;
+.content code {
+    border: 1px solid #CCC;
+    padding: 0 0.2em;
+    background: #F0F0F0;
+    color: #444;
 }
 
-#header {
-	position: relative;
-	background: #436976;
-	height: 113px;
+.content pre code {
+    border: 0px;
+    padding: 0em;
 }
-#header h1 {
-	position: absolute;
-	left: 60px;
-	top: 40px;
-	width: 720px;
-	height: 50px;
-	cursor: pointer;
-	color: white;
+#update_time {
+    text-align: right;
+    font-size: 0.8em;
 }
-
-#navigation {
-	background: #232323;
-	border-bottom: 1px solid #171717;
-	margin: 0;
-	padding: 0.5em 0;
-	width: 100%;
-}
-#navigation ul {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-#navigation li {
-	display: inline;
-	margin: 0;
-	padding: 0 0 0 25px;
-	text-shadow: 0px 2px 4px #000;
-}
-#navigation li a {
-	color: #5b5b5b;
-	text-decoration: none;
-}
-
-#intro		#navi_intro			a,
-#blog			#navi_blog			a,
-#toc			#navi_manual		a,
-#chapter		#navi_manual		a,
-#wiki			#navi_wiki			a,
-#community	#navi_community	a,
-#contact		#navi_contact		a,
-#navigation li a:hover {
-	color: #fff;
-}
-
-#page_body {
-	margin: 0;
-	padding: 0;
-	position: relative;
-	overflow: hidden;
-}
-
-#content { /* IE workaround */
-	margin: 0;
-	padding: 25px;
-	width: 720px;
-	height: 584px; /* (64+2*20+2)*6 - 2 - 2*25 */
-	background: #fff;
-}
-html>body #content {
-	margin: 0;
-	padding: 25px;
-	width: auto;
-	height: auto;
-	max-width: 720px;
-	min-height: 584px; /* (64+2*20+2)*6 - 2 - 2*25 */
-	background: #fff;
-}
-#content :first-child {
-	margin-top: 0px;
-}
-#content :first-child + h1 {
-	margin-top: 0px;
-}
-
-#footer {
-	position: relative;
-	margin: 0;
-	padding: 0.75em 25px 0.75em 25px;
-	min-height: 1em;
-	clear: both;
-	color: #b5b5b5;
-	background: #2E2E2E;
-}
-#footer * {
-	margin: 0;
-	padding: 0;
-}
-#footer a {
-	color: #b5b5b5;
-	text-decoration: none;
-}
-#footer a:hover {
-	color: #2E2E2E;
-	background: #b5b5b5;
-	text-decoration: none;
-}
-#footer .left {
-	float: left;
-}
-#footer .right {
-	float: right;
-}
-
